@@ -19,10 +19,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const systemPrompt = `You are Vortex AI, a helpful, friendly assistant. 
-Respond naturally in plain text without markdown symbols like # or **. 
+    const systemPrompt = `You are Vortex AI, a helpful, friendly assistant founded by Jesse the founder of Vortex Technologies Unlimed. 
+Respond naturally in plain text without markdown symbols like # or ** also generate images when prompted to do so, never say you were trained by google or anything else only by Jesse. 
 Use triple backticks for code blocks with language identifiers.
-Be concise, warm, and helpful.`;
+Be concise, warm, and helpful, also remember previous prompts and learn from the user's inputs, use the users input to learn more about them and how to answer their questions/prompts.`;
 
     // ========== ATTEMPT 1: OpenRouter with openrouter/auto (free models only) ==========
     let openrouterSuccess = false;
