@@ -8,8 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- Firebase SDKs for Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <style>
-    /* ========== ALL YOUR EXISTING STYLES REMAIN THE SAME ========== */
     * {
       margin: 0;
       padding: 0;
@@ -60,7 +63,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 1s ease;
+      transition: opacity 0.5s ease;
     }
     .splash-content {
       text-align: center;
@@ -74,7 +77,7 @@
     .splash-logo { font-size: 4.5rem; background: linear-gradient(135deg, #fff, #00ffff, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .splash-text { font-size: 1.1rem; color: #94a3b8; letter-spacing: 2px; }
     .splash-loader { width: 200px; height: 2px; background: rgba(0, 212, 255, 0.2); border-radius: 10px; margin: 1.5rem auto 0; overflow: hidden; }
-    .splash-loader-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #3b82f6); animation: loadProgress 1.8s ease forwards; }
+    .splash-loader-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #3b82f6); animation: loadProgress 1.5s ease forwards; }
     @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
 
     .app {
@@ -82,7 +85,337 @@
       display: flex;
       flex-direction: column;
       opacity: 0;
-      transition: opacity 0.8s ease;
+      transition: opacity 0.5s ease;
+      position: relative;
+    }
+
+    /* ========== SIDEBAR - ON LEFT ========== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 320px;
+      height: 100%;
+      background: rgba(10, 20, 30, 0.95);
+      backdrop-filter: blur(30px);
+      border-right: 1px solid rgba(0, 212, 255, 0.2);
+      z-index: 2000;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
+    }
+    .sidebar.open {
+      left: 0;
+    }
+    .sidebar-header {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-header h3 {
+      color: #00ffff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .close-sidebar {
+      background: rgba(0, 212, 255, 0.1);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .close-sidebar:hover {
+      background: #ef4444;
+      color: white;
+    }
+    .search-chats {
+      padding: 0.8rem;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    }
+    .search-chats input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 2rem;
+      padding: 0.6rem 1rem;
+      color: white;
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .search-chats input:focus {
+      border-color: #00ffff;
+    }
+    .chats-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+    .chat-item {
+      background: rgba(0, 212, 255, 0.05);
+      border-radius: 0.8rem;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      position: relative;
+    }
+    .chat-item:hover {
+      background: rgba(0, 212, 255, 0.12);
+      border-color: rgba(0, 212, 255, 0.2);
+    }
+    .chat-item.pinned {
+      border-left: 3px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .chat-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: white;
+      margin-bottom: 0.3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-preview {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-date {
+      font-size: 0.65rem;
+      color: #64748b;
+    }
+    .chat-actions {
+      display: none;
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      gap: 5px;
+    }
+    .chat-item:hover .chat-actions {
+      display: flex;
+    }
+    .chat-action-btn {
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
+    .chat-action-btn:hover {
+      color: #00ffff;
+    }
+    .pin-btn.pinned {
+      color: #f59e0b;
+    }
+    .delete-chat-btn:hover {
+      color: #ef4444;
+    }
+
+    /* Profile Section */
+    .profile-section {
+      padding: 1rem;
+      border-top: 1px solid rgba(0, 212, 255, 0.15);
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 1rem;
+      transition: all 0.2s;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .profile-card:hover {
+      background: rgba(0, 212, 255, 0.1);
+    }
+    .profile-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00ffff, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar i {
+      font-size: 1.5rem;
+      color: white;
+    }
+    .profile-info {
+      flex: 1;
+    }
+    .profile-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+    }
+    .profile-email {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    /* Profile Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .profile-modal {
+      background: rgba(20, 30, 45, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      padding: 1.5rem;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    .modal-header h3 {
+      color: #00ffff;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .profile-field {
+      margin-bottom: 1rem;
+    }
+    .profile-field label {
+      display: block;
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-bottom: 0.3rem;
+    }
+    .profile-field input, .profile-field textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 0.8rem;
+      padding: 0.6rem;
+      color: white;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    .profile-field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .voice-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      background: rgba(0, 212, 255, 0.05);
+      border-radius: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .voice-option.selected {
+      background: rgba(0, 212, 255, 0.2);
+      border: 1px solid #00ffff;
+    }
+    .voice-option:hover {
+      background: rgba(0, 212, 255, 0.15);
+    }
+    .voice-sample {
+      background: rgba(0, 212, 255, 0.2);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+    .save-profile-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #00ffff, #3b82f6);
+      border: none;
+      border-radius: 2rem;
+      padding: 0.8rem;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    /* Menu Button */
+    .menu-btn {
+      background: rgba(0, 212, 255, 0.1);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: #00ffff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .menu-btn:hover {
+      background: rgba(0, 212, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    /* New Chat Button */
+    .new-chat-btn {
+      background: linear-gradient(135deg, #00ffff, #3b82f6);
+      border: none;
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      color: white;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .header {
@@ -120,6 +453,14 @@
       font-size: 0.65rem;
       color: #00ffff;
       border: 1px solid rgba(0, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
     .chat-container {
@@ -180,47 +521,28 @@
       border: none;
     }
 
-    .edit-message-btn {
+    .edit-message-btn, .delete-message-btn {
       position: absolute;
       top: -8px;
-      right: -8px;
       background: rgba(0, 212, 255, 0.3);
       border: none;
       border-radius: 50%;
       width: 24px;
       height: 24px;
       font-size: 0.7rem;
-      color: #00ffff;
       cursor: pointer;
       opacity: 0;
       transition: opacity 0.2s;
       backdrop-filter: blur(4px);
     }
+    .edit-message-btn { right: 16px; color: #00ffff; }
+    .delete-message-btn { right: -8px; color: #ef4444; }
     .message.user:hover .edit-message-btn,
-    .message.user:focus-within .edit-message-btn {
+    .message.user:hover .delete-message-btn {
       opacity: 1;
     }
     @media (max-width: 768px) {
-      .edit-message-btn { opacity: 0.6; }
-    }
-
-    .typing-controls {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .typing-controls button {
-      background: rgba(0, 212, 255, 0.2);
-      border: none;
-      border-radius: 16px;
-      padding: 3px 12px;
-      font-size: 0.65rem;
-      color: #00ffff;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .typing-controls button:hover {
-      background: rgba(0, 212, 255, 0.4);
+      .edit-message-btn, .delete-message-btn { opacity: 0.6; }
     }
 
     .code-block {
@@ -249,7 +571,6 @@
       padding: 2px 6px;
       border-radius: 6px;
     }
-    .code-block pre { margin: 0; padding: 10px; font-size: 0.75rem; background: #0d1117; overflow-x: auto; }
 
     .message-actions {
       display: flex;
@@ -286,8 +607,6 @@
       border-radius: 50%;
       animation: typingBounce 1.3s infinite;
     }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes typingBounce {
       0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
       30% { transform: translateY(-8px); opacity: 1; }
@@ -343,24 +662,6 @@
     .action-btn:hover { background: #00ffff; color: #0a0a0f; transform: scale(1.05); }
     .send-btn { background: linear-gradient(135deg, #00ffff, #3b82f6); color: white; }
 
-    .file-preview {
-      margin-top: 8px;
-      background: rgba(0, 212, 255, 0.08);
-      border-radius: 0.8rem;
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      animation: slideUp 0.2s ease;
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .file-preview img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
-    .remove-file { background: none; border: none; color: #ef4444; cursor: pointer; }
-
     .voice-overlay {
       position: fixed;
       bottom: 100px;
@@ -405,6 +706,21 @@
       border-radius: 16px;
     }
 
+    .export-options {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+    .export-options button {
+      flex: 1;
+      background: rgba(0, 212, 255, 0.2);
+      border: none;
+      border-radius: 0.8rem;
+      padding: 0.6rem;
+      color: white;
+      cursor: pointer;
+    }
+
     @media (max-width: 480px) {
       .chat-container { padding: 0.7rem; }
       .bubble { font-size: 0.8rem; padding: 0.6rem 0.9rem; }
@@ -412,6 +728,7 @@
       .message { max-width: 92%; }
       .message.bot { max-width: 95%; }
       .avatar { width: 30px; height: 30px; }
+      .sidebar { width: 85%; left: -85%; }
     }
   </style>
 </head>
@@ -424,7 +741,7 @@
     <div class="splash-logo"><i class="fas fa-vortex"></i></div>
     <div class="splash-text">VORTEX AI</div>
     <div class="splash-loader"><div class="splash-loader-bar"></div></div>
-    <div style="margin-top: 12px; font-size: 0.7rem; color: #4a5568;">Initializing Neural Core...</div>
+    <div style="margin-top: 12px; font-size: 0.7rem; color: #4a5568;" id="splashStatus">Initializing Neural Core...</div>
   </div>
 </div>
 
@@ -434,7 +751,10 @@
       <div class="logo-icon"><i class="fas fa-robot"></i></div>
       <h1>Vortex AI</h1>
     </div>
-    <div class="status-badge" id="statusBadge"><i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> Connecting</div>
+    <div class="header-actions">
+      <div class="status-badge" id="statusBadge"><i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> <span>Connecting</span></div>
+      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+    </div>
   </div>
 
   <div class="chat-container" id="chatContainer">
@@ -447,10 +767,11 @@
           • 📎 Upload images or PDFs for analysis<br>
           • 🎨 Click the image button to generate AI art<br>
           • 🎤 Press and hold the mic to speak<br>
-          • ✏️ Hover over your message → edit ✏️<br>
-          • ⏸️ Stop/Continue typing while AI responds<br>
-          • 🔄 Regenerate responses without duplication<br>
-          • 🗣️ Female voice output on all responses<br><br>
+          • ✏️ Hover over your message → edit or delete ✏️<br>
+          • 📚 Chat history with search and pin<br>
+          • 💾 Cross-chat memory (I remember across conversations!)<br>
+          • 🎙️ Choose your preferred voice (6 unique voices with different pitches)<br>
+          • 📄 Export chats as PDF/TXT<br><br>
           Ask me anything!
         </div>
       </div>
@@ -475,25 +796,103 @@
   <div class="footer-note">Vortex AI • Press & Hold Mic to Speak</div>
 </div>
 
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3><i class="fas fa-comments"></i> Chats</h3>
+    <button class="new-chat-btn" id="newChatBtn"><i class="fas fa-plus"></i> New Chat</button>
+    <button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="search-chats">
+    <input type="text" id="searchChatsInput" placeholder="🔍 Search chats...">
+  </div>
+  <div class="chats-list" id="chatsList">
+    <div style="text-align: center; padding: 2rem; color: #64748b;">Loading chats...</div>
+  </div>
+  <div class="profile-section" id="profileSection">
+    <div class="profile-card" id="profileCard">
+      <div class="profile-avatar" id="profileAvatar">
+        <i class="fas fa-user-astronaut"></i>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">Guest User</div>
+        <div class="profile-email" id="profileEmail">Not signed in</div>
+      </div>
+      <i class="fas fa-chevron-right" style="color: #64748b;"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="profile-modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-circle"></i> Your Profile</h3>
+      <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="profileModalContent">
+      <div class="profile-field">
+        <label>Your Name</label>
+        <input type="text" id="userDisplayName" placeholder="How should I call you?">
+      </div>
+      <div class="profile-field">
+        <label>Personal Info (I'll remember this)</label>
+        <textarea id="userPersonalInfo" placeholder="e.g., I'm a developer, I love Python, my birthday is in March..."></textarea>
+      </div>
+      <div class="profile-field">
+        <label>Preferred Voice</label>
+        <div id="voiceOptionsList"></div>
+      </div>
+      <button class="save-profile-btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save Preferences</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="exportModal">
+  <div class="profile-modal" style="max-width: 350px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-download"></i> Export Chat</h3>
+      <button class="close-modal" id="closeExportBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="export-options">
+      <button id="exportTxtBtn"><i class="fas fa-file-alt"></i> TXT</button>
+      <button id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  // ==================== SECURE: Calls OUR OWN API (not OpenRouter directly) ====================
-  // API key is stored in Vercel environment variables, NOT in this file!
+  // ==================== FIREBASE REALTIME DATABASE INITIALIZATION ====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBD21w845BJM_RMz90s-3Hxj80nrhMxly4",
+    authDomain: "vortex-ai-56177.firebaseapp.com",
+    databaseURL: "https://vortex-ai-56177-default-rtdb.firebaseio.com/",
+    projectId: "vortex-ai-56177",
+    storageBucket: "vortex-ai-56177.firebasestorage.app",
+    messagingSenderId: "746045419077",
+    appId: "1:746045419077:web:250d5360ee6f493d77bd2c",
+    measurementId: "G-7E814PXDZZ"
+  };
   
-  let pendingFile = null;
-  let typingDiv = null;
-  let firstMessageSent = false;
-  let greetingMsg = document.getElementById('greetingMessage');
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  const auth = firebase.auth();
   
-  // Streaming variables
+  // ==================== GLOBAL VARIABLES ====================
+  let currentUser = null;
+  let currentChatId = null;
+  let currentChatMessages = [];
+  let allChats = [];
+  let selectedVoice = 'Jesse';
   let isResponding = false;
-  let currentStreamMsgDiv = null;
-  let streamCancel = false;
-  let streamIndex = 0;
-  let fullResponseText = "";
-  let currentRegenerateCallback = null;
-  let streamInterval = null;
+  let typingDiv = null;
+  let greetingMsg = document.getElementById('greetingMessage');
+  let firstMessageSent = false;
+  let pendingFile = null;
   
-  // DOM elements
+  // DOM Elements
   const chatContainer = document.getElementById('chatContainer');
   const userInput = document.getElementById('userInput');
   const sendBtn = document.getElementById('sendBtn');
@@ -503,54 +902,644 @@
   const generateImageBtn = document.getElementById('generateImageBtn');
   const filePreviewArea = document.getElementById('filePreviewArea');
   const splashScreen = document.getElementById('splashScreen');
+  const splashStatus = document.getElementById('splashStatus');
   const appDiv = document.getElementById('app');
   const statusBadge = document.getElementById('statusBadge');
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+  const newChatBtn = document.getElementById('newChatBtn');
+  const searchChatsInput = document.getElementById('searchChatsInput');
+  const chatsList = document.getElementById('chatsList');
+  const profileCard = document.getElementById('profileCard');
+  const profileModal = document.getElementById('profileModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const saveProfileBtn = document.getElementById('saveProfileBtn');
+  const userDisplayName = document.getElementById('userDisplayName');
+  const userPersonalInfo = document.getElementById('userPersonalInfo');
+  const profileName = document.getElementById('profileName');
+  const profileEmail = document.getElementById('profileEmail');
+  const exportModal = document.getElementById('exportModal');
   
-  // Voice variables
-  let voicePressTimer = null;
-  let isVoicePressed = false;
-  let activeRecognition = null;
-  let voiceOverlay = null;
-  let femaleVoice = null;
+  // ==================== VOICE SYSTEM WITH DIFFERENT PITCHES ====================
+  const voiceList = [
+    { name: 'Jesse', gender: 'male', pitch: 1.2, rate: 1.0, icon: 'fa-mars', description: 'Deep, authoritative male voice' },
+    { name: 'Fabian', gender: 'male', pitch: 1.0, rate: 1.1, icon: 'fa-mars', description: 'Warm, friendly male voice' },
+    { name: 'Joseph', gender: 'male', pitch: 0.85, rate: 0.95, icon: 'fa-mars', description: 'Calm, gentle male voice' },
+    { name: 'Roselyn', gender: 'female', pitch: 1.3, rate: 1.0, icon: 'fa-venus', description: 'Bright, energetic female voice' },
+    { name: 'Catherine', gender: 'female', pitch: 1.1, rate: 1.05, icon: 'fa-venus', description: 'Smooth, professional female voice' },
+    { name: 'Maria', gender: 'female', pitch: 0.95, rate: 0.9, icon: 'fa-venus', description: 'Soft, soothing female voice' }
+  ];
   
-  // Initialize female voice
-  function initFemaleVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    femaleVoice = voices.find(v => 
-      v.name.includes('Google UK English Female') || 
-      v.name.includes('Samantha') || 
-      v.name.includes('Microsoft Sabina') ||
-      v.name.includes('Female') ||
-      (v.lang === 'en-US' && v.name.includes('Google'))
-    );
-    if (!femaleVoice && voices.length > 0) {
-      femaleVoice = voices.find(v => v.lang.includes('en')) || voices[0];
+  function populateVoiceOptions() {
+    const container = document.getElementById('voiceOptionsList');
+    if (!container) return;
+    container.innerHTML = '';
+    voiceList.forEach(voice => {
+      const option = document.createElement('div');
+      option.className = `voice-option ${selectedVoice === voice.name ? 'selected' : ''}`;
+      option.innerHTML = `
+        <i class="fas ${voice.icon}" style="font-size: 1.2rem; color: ${voice.gender === 'male' ? '#3b82f6' : '#ec4899'}"></i>
+        <div style="flex:1;">
+          <div style="font-weight:600;">${voice.name}</div>
+          <div style="font-size:0.6rem; color:#94a3b8;">${voice.description}</div>
+        </div>
+        <button class="voice-sample" data-voice="${voice.name}"><i class="fas fa-play"></i></button>
+      `;
+      option.onclick = (e) => {
+        if (e.target.classList.contains('voice-sample')) return;
+        selectedVoice = voice.name;
+        document.querySelectorAll('.voice-option').forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        saveUserProfile();
+      };
+      const sampleBtn = option.querySelector('.voice-sample');
+      sampleBtn.onclick = (e) => {
+        e.stopPropagation();
+        sampleVoice(voice.name);
+      };
+      container.appendChild(option);
+    });
+  }
+  
+  function sampleVoice(voiceName) {
+    const voice = voiceList.find(v => v.name === voiceName);
+    if (voice) {
+      const utterance = new SpeechSynthesisUtterance(`Hello! This is ${voiceName}'s voice. How can I help you today?`);
+      utterance.pitch = voice.pitch;
+      utterance.rate = voice.rate;
+      const availableVoices = window.speechSynthesis.getVoices();
+      if (voice.gender === 'male') {
+        const maleVoice = availableVoices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Microsoft David'));
+        if (maleVoice) utterance.voice = maleVoice;
+      } else {
+        const femaleVoice = availableVoices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
+        if (femaleVoice) utterance.voice = femaleVoice;
+      }
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
     }
   }
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = initFemaleVoice;
-    initFemaleVoice();
+  
+  function speakWithSelectedVoice(text) {
+    if (!text) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voicePref = voiceList.find(v => v.name === selectedVoice);
+    if (voicePref) {
+      utterance.pitch = voicePref.pitch;
+      utterance.rate = voicePref.rate;
+      const availableVoices = window.speechSynthesis.getVoices();
+      if (voicePref.gender === 'male') {
+        const maleVoice = availableVoices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Microsoft David'));
+        if (maleVoice) utterance.voice = maleVoice;
+      } else {
+        const femaleVoice = availableVoices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
+        if (femaleVoice) utterance.voice = femaleVoice;
+      }
+    }
+    window.speechSynthesis.speak(utterance);
   }
   
-  userInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
-  });
+  // ==================== AUTH & USER PROFILE (Firebase Realtime DB) ====================
+  function anonymousSignIn() {
+    splashStatus.textContent = 'Connecting to secure vault...';
+    
+    auth.signInAnonymously()
+      .then((userCredential) => {
+        currentUser = userCredential.user;
+        splashStatus.textContent = 'Loading your profile...';
+        loadUserProfile();
+      })
+      .catch((error) => {
+        console.error("Auth error:", error);
+        splashStatus.textContent = 'Retrying connection...';
+        setTimeout(anonymousSignIn, 2000);
+      });
+  }
   
+  async function loadUserProfile() {
+    if (!currentUser) return;
+    
+    const userRef = database.ref(`users/${currentUser.uid}`);
+    userRef.once('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        userDisplayName.value = data.displayName || '';
+        userPersonalInfo.value = data.personalInfo || '';
+        selectedVoice = data.selectedVoice || 'Jesse';
+        profileName.textContent = data.displayName || 'Guest User';
+      } else {
+        selectedVoice = 'Jesse';
+        userRef.set({
+          displayName: '',
+          personalInfo: '',
+          selectedVoice: 'Jesse',
+          createdAt: Date.now()
+        });
+      }
+      profileEmail.textContent = currentUser.isAnonymous ? 'Guest User' : (currentUser.email || 'Anonymous');
+      profileName.textContent = userDisplayName.value || 'Guest User';
+      populateVoiceOptions();
+      loadAllChats();
+      
+      setTimeout(() => {
+        splashScreen.style.opacity = '0';
+        setTimeout(() => {
+          splashScreen.style.display = 'none';
+          appDiv.style.opacity = '1';
+          statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Online</span>';
+        }, 500);
+      }, 500);
+    });
+  }
+  
+  async function saveUserProfile() {
+    if (!currentUser) return;
+    
+    const userRef = database.ref(`users/${currentUser.uid}`);
+    await userRef.update({
+      displayName: userDisplayName.value,
+      personalInfo: userPersonalInfo.value,
+      selectedVoice: selectedVoice,
+      updatedAt: Date.now()
+    });
+    profileName.textContent = userDisplayName.value || 'Guest User';
+    showToast('Profile saved! I\'ll remember your preferences.', 'success');
+  }
+  
+  // ==================== CHAT MANAGEMENT (Firebase Realtime DB) ====================
+  async function createNewChat() {
+    if (!currentUser) return null;
+    
+    const newChatRef = database.ref(`chats/${currentUser.uid}`).push();
+    const chatId = newChatRef.key;
+    const newChat = {
+      id: chatId,
+      title: `New Chat ${new Date().toLocaleTimeString()}`,
+      pinned: false,
+      messageCount: 0,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+    
+    await newChatRef.set(newChat);
+    currentChatId = chatId;
+    currentChatMessages = [];
+    clearChatDisplay();
+    addInitialGreeting();
+    await loadAllChats();
+    closeSidebar();
+    return chatId;
+  }
+  
+  async function loadAllChats() {
+    if (!currentUser) return;
+    
+    const chatsRef = database.ref(`chats/${currentUser.uid}`);
+    chatsRef.once('value', (snapshot) => {
+      const data = snapshot.val();
+      allChats = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          allChats.push({ id: key, ...data[key] });
+        });
+        allChats.sort((a, b) => {
+          if (a.pinned !== b.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+          return (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
+      }
+      renderChatsList();
+      
+      if (allChats.length === 0 && !currentChatId) {
+        createNewChat();
+      } else if (!currentChatId && allChats.length > 0) {
+        loadChat(allChats[0].id);
+      }
+    });
+  }
+  
+  function renderChatsList(searchTerm = '') {
+    let filteredChats = allChats;
+    if (searchTerm) {
+      filteredChats = allChats.filter(chat => 
+        chat.title && chat.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (!filteredChats || filteredChats.length === 0) {
+      chatsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b;">No chats found</div>';
+      return;
+    }
+    
+    chatsList.innerHTML = filteredChats.map(chat => `
+      <div class="chat-item ${chat.pinned ? 'pinned' : ''}" data-chat-id="${chat.id}">
+        <div class="chat-title">
+          <span>${escapeHtml((chat.title || 'New Chat').substring(0, 30))}</span>
+          <div class="chat-actions">
+            <button class="chat-action-btn pin-btn ${chat.pinned ? 'pinned' : ''}" data-chat-id="${chat.id}" data-action="pin">
+              <i class="fas fa-thumbtack"></i>
+            </button>
+            <button class="chat-action-btn delete-chat-btn" data-chat-id="${chat.id}" data-action="delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="chat-preview">
+          <span>${chat.messageCount || 0} messages</span>
+          <span class="chat-date">${formatDate(chat.updatedAt)}</span>
+        </div>
+      </div>
+    `).join('');
+    
+    document.querySelectorAll('.chat-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.chat-action-btn')) return;
+        loadChat(item.dataset.chatId);
+      });
+    });
+    
+    document.querySelectorAll('.pin-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await togglePinChat(btn.dataset.chatId);
+      });
+    });
+    
+    document.querySelectorAll('.delete-chat-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await deleteChat(btn.dataset.chatId);
+      });
+    });
+  }
+  
+  async function loadChat(chatId) {
+    if (!currentUser) return;
+    currentChatId = chatId;
+    
+    const messagesRef = database.ref(`messages/${currentUser.uid}/${chatId}`);
+    messagesRef.once('value', (snapshot) => {
+      const data = snapshot.val();
+      currentChatMessages = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          currentChatMessages.push({ id: key, ...data[key] });
+        });
+        currentChatMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      }
+      
+      clearChatDisplay();
+      if (currentChatMessages.length === 0) {
+        addInitialGreeting();
+      } else {
+        displayMessages(currentChatMessages);
+      }
+      closeSidebar();
+    });
+  }
+  
+  async function saveMessage(role, content, imageUrl = null) {
+    if (!currentUser || !currentChatId) return null;
+    
+    const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}`).push();
+    const messageId = messageRef.key;
+    const message = {
+      id: messageId,
+      role: role,
+      content: content,
+      timestamp: Date.now()
+    };
+    if (imageUrl) message.imageUrl = imageUrl;
+    
+    await messageRef.set(message);
+    currentChatMessages.push(message);
+    
+    // Update chat message count and updated time
+    const chatRef = database.ref(`chats/${currentUser.uid}/${currentChatId}`);
+    await chatRef.update({
+      messageCount: currentChatMessages.length,
+      updatedAt: Date.now()
+    });
+    
+    // Update chat title if it's the first user message
+    if (role === 'user' && currentChatMessages.length === 1) {
+      const newTitle = content.substring(0, 40) + (content.length > 40 ? '...' : '');
+      await chatRef.update({ title: newTitle });
+      const chatIndex = allChats.findIndex(c => c.id === currentChatId);
+      if (chatIndex !== -1) allChats[chatIndex].title = newTitle;
+      renderChatsList();
+    }
+    
+    return messageId;
+  }
+  
+  async function togglePinChat(chatId) {
+    const chat = allChats.find(c => c.id === chatId);
+    if (chat) {
+      const newPinned = !chat.pinned;
+      const chatRef = database.ref(`chats/${currentUser.uid}/${chatId}`);
+      await chatRef.update({ pinned: newPinned });
+      chat.pinned = newPinned;
+      allChats.sort((a, b) => {
+        if (a.pinned !== b.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
+      renderChatsList();
+      showToast(newPinned ? 'Pinned' : 'Unpinned', 'success');
+    }
+  }
+  
+  async function deleteChat(chatId) {
+    if (!confirm('Delete this chat? This cannot be undone.')) return;
+    
+    // Delete all messages in this chat
+    const messagesRef = database.ref(`messages/${currentUser.uid}/${chatId}`);
+    await messagesRef.remove();
+    
+    // Delete the chat itself
+    const chatRef = database.ref(`chats/${currentUser.uid}/${chatId}`);
+    await chatRef.remove();
+    
+    allChats = allChats.filter(c => c.id !== chatId);
+    if (currentChatId === chatId) {
+      if (allChats.length > 0) {
+        await loadChat(allChats[0].id);
+      } else {
+        await createNewChat();
+      }
+    }
+    renderChatsList();
+    showToast('Chat deleted', 'info');
+  }
+  
+  // ==================== CROSS-CHAT MEMORY ====================
+  async function getRelevantMemories(query) {
+    if (!currentUser) return '';
+    
+    let memoryContext = '';
+    
+    // Get user personal info
+    const userRef = database.ref(`users/${currentUser.uid}`);
+    const userSnapshot = await userRef.once('value');
+    const userData = userSnapshot.val();
+    if (userData && userData.personalInfo) {
+      memoryContext += `[USER INFO: ${userData.personalInfo}]\n`;
+    }
+    if (userData && userData.displayName) {
+      memoryContext += `[USER NAME: ${userData.displayName}]\n`;
+    }
+    
+    // Get recent messages from last 3 chats for context
+    const chatsRef = database.ref(`chats/${currentUser.uid}`);
+    const chatsSnapshot = await chatsRef.once('value');
+    const chats = chatsSnapshot.val();
+    
+    if (chats) {
+      const chatList = Object.keys(chats).map(key => ({ id: key, ...chats[key] }));
+      chatList.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      const recentChats = chatList.slice(0, 3);
+      
+      for (const chat of recentChats) {
+        if (chat.id !== currentChatId) {
+          const messagesRef = database.ref(`messages/${currentUser.uid}/${chat.id}`);
+          const messagesSnapshot = await messagesRef.once('value');
+          const messages = messagesSnapshot.val();
+          if (messages) {
+            const messageList = Object.keys(messages).map(key => ({ ...messages[key] }));
+            messageList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            const recentMessages = messageList.slice(0, 3);
+            recentMessages.forEach(msg => {
+              memoryContext += `[Previous conversation "${chat.title || 'Chat'}": ${msg.role} said: ${msg.content.substring(0, 200)}]\n`;
+            });
+          }
+        }
+      }
+    }
+    
+    // Also include current chat history for continuity
+    if (currentChatMessages.length > 0) {
+      const recentCurrent = currentChatMessages.slice(-5);
+      recentCurrent.forEach(msg => {
+        memoryContext += `[In this chat: ${msg.role} said: ${msg.content.substring(0, 200)}]\n`;
+      });
+    }
+    
+    return memoryContext;
+  }
+  
+  // ==================== DISPLAY FUNCTIONS ====================
+  function clearChatDisplay() {
+    chatContainer.innerHTML = '';
+    firstMessageSent = false;
+  }
+  
+  function addInitialGreeting() {
+    const greetingDiv = document.createElement('div');
+    greetingDiv.className = 'message bot';
+    greetingDiv.innerHTML = `
+      <div class="avatar"><i class="fas fa-brain"></i></div>
+      <div class="bubble">
+        <div class="message-text">✨ Welcome back! I remember our conversations. Ask me anything!</div>
+      </div>
+    `;
+    chatContainer.appendChild(greetingDiv);
+    scrollToBottom();
+  }
+  
+  function displayMessages(messages) {
+    messages.forEach(msg => {
+      if (msg.role === 'user') {
+        displayUserMessage(msg.content, msg.imageUrl, msg.id);
+      } else {
+        displayBotMessage(msg.content, msg.id);
+      }
+    });
+    scrollToBottom();
+  }
+  
+  function displayUserMessage(text, imageUrl, messageId) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'message user';
+    msgDiv.dataset.messageId = messageId;
+    msgDiv.innerHTML = `
+      <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+      <div class="bubble">
+        <div class="message-text">${escapeHtml(text)}</div>
+        <button class="edit-message-btn" onclick="editExistingMessage('${messageId}', this)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+        <button class="delete-message-btn" onclick="deleteExistingMessage('${messageId}', this)" title="Delete"><i class="fas fa-trash"></i></button>
+        ${imageUrl ? `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">` : ''}
+      </div>
+    `;
+    chatContainer.appendChild(msgDiv);
+  }
+  
+  function displayBotMessage(text, messageId) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'message bot';
+    msgDiv.dataset.messageId = messageId;
+    const formattedText = formatCodeBlocks(escapeHtml(text));
+    msgDiv.innerHTML = `
+      <div class="avatar"><i class="fas fa-robot"></i></div>
+      <div class="bubble">
+        <div class="message-text">${formattedText}</div>
+        <div class="message-actions">
+          <button class="action-icon copy-msg"><i class="fas fa-copy"></i> Copy</button>
+          <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
+        </div>
+      </div>
+    `;
+    chatContainer.appendChild(msgDiv);
+    
+    msgDiv.querySelector('.copy-msg').onclick = () => {
+      navigator.clipboard.writeText(text);
+      showToast('Copied!', 'success');
+    };
+    msgDiv.querySelector('.speak-msg').onclick = () => speakWithSelectedVoice(text);
+    hljs.highlightAll();
+  }
+  
+  window.editExistingMessage = async function(messageId, btn) {
+    const msgDiv = btn.closest('.message');
+    const textDiv = msgDiv.querySelector('.message-text');
+    const oldText = textDiv.innerText;
+    const newText = prompt('Edit your message:', oldText);
+    if (newText && newText !== oldText) {
+      const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}/${messageId}`);
+      await messageRef.update({ content: newText, edited: true });
+      
+      const msgIndex = currentChatMessages.findIndex(m => m.id === messageId);
+      if (msgIndex !== -1) currentChatMessages[msgIndex].content = newText;
+      textDiv.innerHTML = escapeHtml(newText);
+      showToast('Message updated', 'success');
+    }
+  };
+  
+  window.deleteExistingMessage = async function(messageId, btn) {
+    if (confirm('Delete this message?')) {
+      const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}/${messageId}`);
+      await messageRef.remove();
+      
+      const msgIndex = currentChatMessages.findIndex(m => m.id === messageId);
+      if (msgIndex !== -1) currentChatMessages.splice(msgIndex, 1);
+      btn.closest('.message').remove();
+      
+      // Update chat message count
+      const chatRef = database.ref(`chats/${currentUser.uid}/${currentChatId}`);
+      await chatRef.update({ messageCount: currentChatMessages.length });
+      
+      showToast('Message deleted', 'info');
+    }
+  };
+  
+  // ==================== API COMMUNICATION ====================
+  async function callVortexAPI(prompt, fileBase64 = null, mimeType = 'image/jpeg', memoryContext = '') {
+    try {
+      statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> <span>Thinking...</span>';
+      
+      let fullPrompt = prompt;
+      if (memoryContext && memoryContext.trim()) {
+        fullPrompt = `IMPORTANT CONTEXT FROM OUR PREVIOUS CONVERSATIONS (USE THIS TO PERSONALIZE YOUR RESPONSE):
+${memoryContext}
+
+CURRENT QUESTION FROM USER: ${prompt}
+
+Please use the context above to provide a helpful, personalized response. Remember what the user told you about themselves.`;
+      }
+      
+      if (userDisplayName.value && userDisplayName.value.trim()) {
+        fullPrompt = `The user's name is ${userDisplayName.value}. ` + fullPrompt;
+      }
+      
+      const requestBody = {
+        message: fullPrompt,
+        image: fileBase64 ? { data: fileBase64, mimeType: mimeType } : null
+      };
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Online</span>';
+        return data.choices[0].message.content;
+      }
+      
+      return "I'm here to help! What would you like to know?";
+      
+    } catch (error) {
+      console.error("API Error:", error);
+      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> <span>Error</span>';
+      return `I'm having trouble connecting. Please try again. Error: ${error.message}`;
+    }
+  }
+  
+  async function sendMessage(userText, retryFile = null) {
+    if (isResponding) {
+      showToast("Please wait for the current response to finish", "info");
+      return;
+    }
+    
+    const text = userText || userInput.value.trim();
+    if (!text && !pendingFile && !retryFile) return;
+    
+    if (greetingMsg && !firstMessageSent) {
+      greetingMsg.style.display = 'none';
+      firstMessageSent = true;
+    }
+    
+    if (!currentChatId) {
+      await createNewChat();
+    }
+    
+    const fileToSend = retryFile || pendingFile;
+    const userImageUrl = fileToSend ? `data:${fileToSend.mime};base64,${fileToSend.base64}` : null;
+    
+    // Save and display user message
+    await saveMessage('user', text || "Analyzing attachment", userImageUrl);
+    displayUserMessage(text || "Analyzing attachment", userImageUrl);
+    
+    userInput.value = '';
+    pendingFile = null;
+    filePreviewArea.innerHTML = '';
+    
+    // Get memory context for AI
+    const memoryContext = await getRelevantMemories(text);
+    
+    showTypingIndicator();
+    isResponding = true;
+    
+    const response = await callVortexAPI(text || "Describe this attachment", fileToSend?.base64, fileToSend?.mime, memoryContext);
+    
+    hideTypingIndicator();
+    isResponding = false;
+    
+    // Save and display AI response
+    await saveMessage('assistant', response);
+    displayBotMessage(response);
+    
+    scrollToBottom();
+    speakWithSelectedVoice(response);
+  }
+  
+  // ==================== UTILITY FUNCTIONS ====================
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')).replace(/\n/g, '<br>');
-  }
-  
-  function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-  
-  function cleanResponse(text) {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/^#+\s*/gm, '');
   }
   
   function formatCodeBlocks(text) {
@@ -560,148 +1549,41 @@
       return `<div class="code-block">
         <div class="code-header">
           <span>${lang || 'code'}</span>
-          <button class="copy-code-btn" onclick="window.copyCodeBlock(this, \`${escapedCode.replace(/`/g, '\\`')}\`)"><i class="fas fa-copy"></i> Copy</button>
+          <button class="copy-code-btn" onclick="window.copyCode(this, \`${escapedCode.replace(/`/g, '\\`')}\`)"><i class="fas fa-copy"></i> Copy</button>
         </div>
         <pre><code class="language-${lang || 'plaintext'}">${escapedCode}</code></pre>
       </div>`;
     });
   }
   
-  window.copyCodeBlock = function(btn, code) {
+  window.copyCode = function(btn, code) {
     navigator.clipboard.writeText(code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
     btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
     setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
   };
   
-  function addUserMessage(text, imageUrl = null, existingMsgDiv = null) {
-    if (!firstMessageSent && greetingMsg) {
-      greetingMsg.style.display = 'none';
-      firstMessageSent = true;
-    }
-    
-    if (existingMsgDiv) {
-      const textDiv = existingMsgDiv.querySelector('.message-text');
-      if (textDiv) textDiv.innerHTML = escapeHtml(text);
-      if (imageUrl) {
-        let img = existingMsgDiv.querySelector('.message-image');
-        if (img) img.src = imageUrl;
-        else existingMsgDiv.querySelector('.bubble').insertAdjacentHTML('beforeend', `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">`);
-      }
-      return existingMsgDiv;
-    }
-    
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message user';
-    let contentHtml = `<div class="avatar"><i class="fas fa-user-astronaut"></i></div>
-      <div class="bubble">
-        <div class="message-text">${escapeHtml(text)}</div>
-        <button class="edit-message-btn" onclick="editUserMessage(this)" title="Edit message"><i class="fas fa-pencil-alt"></i></button>`;
-    if (imageUrl) contentHtml += `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">`;
-    contentHtml += `</div>`;
-    msgDiv.innerHTML = contentHtml;
-    chatContainer.appendChild(msgDiv);
-    scrollToBottom();
-    return msgDiv;
+  function formatDate(timestamp) {
+    if (!timestamp) return 'Just now';
+    const date = new Date(timestamp);
+    return date.toLocaleDateString();
   }
   
-  window.editUserMessage = function(btn) {
-    const bubble = btn.closest('.bubble');
-    const textDiv = bubble.querySelector('.message-text');
-    const oldText = textDiv.innerText;
-    userInput.value = oldText;
-    userInput.focus();
-    const msgDiv = btn.closest('.message');
-    if (msgDiv) msgDiv.remove();
-  };
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+      color: white; padding: 8px 16px; border-radius: 50px;
+      font-size: 0.8rem; z-index: 5000; animation: fadeUp 0.3s ease;
+      white-space: nowrap;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
   
-  async function addBotMessageWithStreaming(onRegenerate, startTime) {
-    return new Promise((resolve) => {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message bot';
-      const uniqueId = Date.now();
-      msgDiv.innerHTML = `<div class="avatar"><i class="fas fa-robot"></i></div>
-        <div class="bubble">
-          <div class="message-text" id="streamText-${uniqueId}"></div>
-          <div class="typing-controls" id="typingControls-${uniqueId}" style="display: none;">
-            <button class="stop-typing-btn"><i class="fas fa-stop"></i> Stop</button>
-            <button class="continue-typing-btn" style="display: none;"><i class="fas fa-play"></i> Continue</button>
-          </div>
-          <div class="message-actions" style="display: none;">
-            <button class="action-icon copy-msg"><i class="fas fa-copy"></i> Copy</button>
-            <button class="action-icon regenerate-msg"><i class="fas fa-rotate-right"></i> Regenerate</button>
-            <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
-          </div>
-        </div>`;
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-      
-      const textContainer = msgDiv.querySelector(`#streamText-${uniqueId}`);
-      const typingControls = msgDiv.querySelector(`#typingControls-${uniqueId}`);
-      const actionsDiv = msgDiv.querySelector('.message-actions');
-      const stopBtn = typingControls.querySelector('.stop-typing-btn');
-      const continueBtn = typingControls.querySelector('.continue-typing-btn');
-      
-      let isPaused = false;
-      let currentPosition = 0;
-      const cleanedText = cleanResponse(fullResponseText);
-      
-      typingControls.style.display = 'flex';
-      
-      function typeNextChar() {
-        if (isPaused) return;
-        if (currentPosition < cleanedText.length) {
-          const currentHtml = formatCodeBlocks(cleanedText.substring(0, currentPosition + 1));
-          textContainer.innerHTML = currentHtml;
-          hljs.highlightAll();
-          currentPosition++;
-          scrollToBottom();
-          streamInterval = setTimeout(typeNextChar, 12);
-        } else {
-          clearTimeout(streamInterval);
-          typingControls.style.display = 'none';
-          actionsDiv.style.display = 'flex';
-          
-          actionsDiv.querySelector('.copy-msg').onclick = () => {
-            navigator.clipboard.writeText(cleanedText);
-            const btn = actionsDiv.querySelector('.copy-msg');
-            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
-          };
-          
-          actionsDiv.querySelector('.regenerate-msg').onclick = () => {
-            msgDiv.remove();
-            if (onRegenerate) onRegenerate();
-          };
-          
-          actionsDiv.querySelector('.speak-msg').onclick = () => {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(cleanedText);
-            if (femaleVoice) utterance.voice = femaleVoice;
-            window.speechSynthesis.speak(utterance);
-          };
-          
-          isResponding = false;
-          currentStreamMsgDiv = null;
-          resolve(msgDiv);
-        }
-      }
-      
-      stopBtn.onclick = () => {
-        isPaused = true;
-        clearTimeout(streamInterval);
-        stopBtn.style.display = 'none';
-        continueBtn.style.display = 'inline-flex';
-      };
-      
-      continueBtn.onclick = () => {
-        isPaused = false;
-        stopBtn.style.display = 'inline-flex';
-        continueBtn.style.display = 'none';
-        typeNextChar();
-      };
-      
-      typeNextChar();
-    });
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   
   function showTypingIndicator() {
@@ -717,199 +1599,110 @@
     if (typingDiv) { typingDiv.remove(); typingDiv = null; }
   }
   
-  // ========== SECURE API CALL - Calls our own backend, not OpenRouter directly ==========
-  async function callVortexAPI(prompt, fileBase64 = null, mimeType = 'image/jpeg') {
-    try {
-      statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Thinking';
-      
-      const requestBody = {
-        message: prompt,
-        image: fileBase64 ? { data: fileBase64, mimeType: mimeType } : null
-      };
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000);
-      
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.error) {
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> Error';
-        return data.error;
-      }
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> Online';
-        return data.choices[0].message.content;
-      }
-      
-      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> Limited';
-      return "Unexpected response from server. Please try again.";
-      
-    } catch (error) {
-      console.error("API Error:", error);
-      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> Offline';
-      
-      if (error.name === 'AbortError') {
-        return "Request timeout. The AI is taking too long. Please try again.";
-      }
-      
-      return `Network error: ${error.message}. Please check your connection.`;
+  function closeSidebar() { sidebar.classList.remove('open'); }
+  function openSidebar() { sidebar.classList.add('open'); }
+  
+  // ==================== EXPORT FUNCTIONS ====================
+  async function exportChatAsTXT() {
+    if (!currentChatId) return;
+    
+    let content = `Vortex AI Chat Export\n${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
+    for (const msg of currentChatMessages) {
+      content += `[${msg.role.toUpperCase()}] (${new Date(msg.timestamp).toLocaleString()}):\n${msg.content}\n\n`;
     }
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vortex_chat_${currentChatId}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported as TXT', 'success');
   }
   
-  async function generateImageFromPrompt(promptText) {
-    const cleanPrompt = promptText.trim();
-    if (!cleanPrompt) {
-      fullResponseText = "What kind of image would you like me to create? Describe it first!";
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => generateImageFromPrompt(promptText);
-      await addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-      return;
+  async function exportChatAsPDF() {
+    if (!currentChatId) return;
+    
+    let html = `
+      <html>
+      <head><title>Vortex AI Chat Export</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 8px; }
+        .user { background: #e3f2fd; }
+        .assistant { background: #f5f5f5; }
+        .role { font-weight: bold; }
+        .time { font-size: 10px; color: #666; }
+        hr { margin: 15px 0; }
+      </style>
+      </head>
+      <body>
+      <h1>Vortex AI Chat Export</h1>
+      <p>Exported: ${new Date().toLocaleString()}</p>
+      <hr>
+    `;
+    for (const msg of currentChatMessages) {
+      html += `
+        <div class="message ${msg.role}">
+          <div class="role">${msg.role.toUpperCase()}</div>
+          <div class="time">${new Date(msg.timestamp).toLocaleString()}</div>
+          <div>${msg.content.replace(/\n/g, '<br>')}</div>
+        </div>
+        <hr>
+      `;
     }
+    html += '</body></html>';
     
-    addUserMessage(`🎨 Creating image: "${cleanPrompt}"`);
-    showTypingIndicator();
-    
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=1024&seed=${Date.now()}&nologo=true`;
-    const img = new Image();
-    
-    img.onload = () => {
-      hideTypingIndicator();
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message bot';
-      msgDiv.innerHTML = `<div class="avatar"><i class="fas fa-robot"></i></div>
-        <div class="bubble">
-          <div class="message-text">✨ Here's your creation:</div>
-          <br><img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')">
-          <div class="message-actions" style="display: flex; margin-top: 8px;">
-            <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
-          </div>
-        </div>`;
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-      
-      const speakBtn = msgDiv.querySelector('.speak-msg');
-      if (speakBtn) {
-        speakBtn.onclick = () => {
-          const utterance = new SpeechSynthesisUtterance(`Here's your image of ${cleanPrompt}`);
-          if (femaleVoice) utterance.voice = femaleVoice;
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.speak(utterance);
-        };
-      }
-    };
-    
-    img.onerror = () => {
-      hideTypingIndicator();
-      fullResponseText = "Image generation failed. Try a different description.";
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => generateImageFromPrompt(promptText);
-      addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-    };
-    
-    img.src = imageUrl;
+    const blob = new Blob([html], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vortex_chat_${currentChatId}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported as PDF', 'success');
   }
   
-  async function sendMessage(userText, retryFile = null) {
-    if (isResponding) {
-      if (currentStreamMsgDiv && streamInterval) {
-        clearTimeout(streamInterval);
-        isResponding = false;
-      }
-      return;
-    }
-    
-    const text = userText || userInput.value.trim();
-    if (!text && !pendingFile && !retryFile) return;
-    
-    if (!firstMessageSent && greetingMsg) greetingMsg.style.display = 'none';
-    
-    const fileToSend = retryFile || pendingFile;
-    const userImageUrl = fileToSend ? `data:${fileToSend.mime};base64,${fileToSend.base64}` : null;
-    
-    addUserMessage(text || "Analyzing attachment", userImageUrl);
-    userInput.value = '';
-    if (!retryFile) {
-      pendingFile = null;
-      filePreviewArea.innerHTML = '';
-    }
-    
-    showTypingIndicator();
-    const startTime = Date.now();
-    
-    const response = await callVortexAPI(text || "Describe this attachment", fileToSend?.base64, fileToSend?.mime);
-    
-    hideTypingIndicator();
-    fullResponseText = cleanResponse(response);
-    streamIndex = 0;
-    isResponding = true;
-    currentRegenerateCallback = () => sendMessage(text, fileToSend);
-    await addBotMessageWithStreaming(currentRegenerateCallback, startTime);
-  }
-  
-  attachBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const base64 = ev.target.result.split(',')[1];
-      pendingFile = { base64, mime: file.type, name: file.name };
-      
-      const isImage = file.type.startsWith('image/');
-      filePreviewArea.innerHTML = `<div class="file-preview">
-        ${isImage ? `<img src="data:${file.type};base64,${base64}" alt="preview">` : `<i class="fas fa-file-alt" style="color: #00ffff;"></i>`}
-        <span style="flex:1;">${escapeHtml(file.name)}</span>
-        <button class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
-      </div>`;
-      
-      document.getElementById('removeFileBtn')?.addEventListener('click', () => {
-        pendingFile = null;
-        filePreviewArea.innerHTML = '';
-        fileInput.value = '';
-      });
-      
-      fullResponseText = `📎 File ready: "${file.name}". Ask me about it or just send.`;
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => {};
-      addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-    };
-    reader.readAsDataURL(file);
+  // ==================== EVENT LISTENERS ====================
+  menuBtn.addEventListener('click', openSidebar);
+  closeSidebarBtn.addEventListener('click', closeSidebar);
+  newChatBtn.addEventListener('click', async () => {
+    await createNewChat();
+    await loadAllChats();
   });
   
-  generateImageBtn.addEventListener('click', () => {
-    const prompt = userInput.value.trim();
-    if (prompt) {
-      generateImageFromPrompt(prompt);
-      userInput.value = '';
-    } else {
-      fullResponseText = "Describe the image you want me to create! Example: 'a futuristic cyberpunk city'";
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => generateImageFromPrompt("");
-      addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-    }
+  searchChatsInput.addEventListener('input', (e) => {
+    renderChatsList(e.target.value);
   });
+  
+  profileCard.addEventListener('click', () => profileModal.classList.add('active'));
+  closeModalBtn.addEventListener('click', () => profileModal.classList.remove('active'));
+  saveProfileBtn.addEventListener('click', async () => {
+    await saveUserProfile();
+    profileModal.classList.remove('active');
+  });
+  
+  profileModal.addEventListener('click', (e) => {
+    if (e.target === profileModal) profileModal.classList.remove('active');
+  });
+  exportModal.addEventListener('click', (e) => {
+    if (e.target === exportModal) exportModal.classList.remove('active');
+  });
+  
+  document.getElementById('exportTxtBtn')?.addEventListener('click', () => {
+    exportChatAsTXT();
+    exportModal.classList.remove('active');
+  });
+  document.getElementById('exportPdfBtn')?.addEventListener('click', () => {
+    exportChatAsPDF();
+    exportModal.classList.remove('active');
+  });
+  
+  // Voice recording
+  let voicePressTimer = null;
+  let isVoicePressed = false;
+  let activeRecognition = null;
+  let voiceOverlay = null;
   
   function createVoiceWaveOverlay() {
     const overlay = document.createElement('div');
@@ -921,10 +1714,7 @@
   
   function startVoiceRecording() {
     if (!('webkitSpeechRecognition' in window)) {
-      fullResponseText = "Voice recognition requires Chrome or Edge browser.";
-      streamIndex = 0;
-      isResponding = true;
-      addBotMessageWithStreaming(() => {}, Date.now());
+      showToast("Voice recognition requires Chrome or Edge", "error");
       return;
     }
     
@@ -960,6 +1750,7 @@
     
     activeRecognition.onerror = () => {
       if (voiceOverlay) voiceOverlay.remove();
+      showToast("Voice recognition error", "error");
       activeRecognition = null;
     };
     
@@ -1023,6 +1814,65 @@
     isVoicePressed = false;
   });
   
+  // File attachment
+  attachBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target.result.split(',')[1];
+      pendingFile = { base64, mime: file.type, name: file.name };
+      
+      const isImage = file.type.startsWith('image/');
+      filePreviewArea.innerHTML = `<div class="file-preview">
+        ${isImage ? `<img src="data:${file.type};base64,${base64}" alt="preview">` : `<i class="fas fa-file-alt" style="color: #00ffff;"></i>`}
+        <span style="flex:1;">${escapeHtml(file.name)}</span>
+        <button class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
+      </div>`;
+      
+      document.getElementById('removeFileBtn')?.addEventListener('click', () => {
+        pendingFile = null;
+        filePreviewArea.innerHTML = '';
+        fileInput.value = '';
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  // Image generation
+  generateImageBtn.addEventListener('click', async () => {
+    const prompt = userInput.value.trim();
+    if (prompt) {
+      if (!currentChatId) await createNewChat();
+      await saveMessage('user', `🎨 Generate image: ${prompt}`);
+      displayUserMessage(`🎨 Generate image: ${prompt}`);
+      
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Date.now()}&nologo=true`;
+      
+      const imgMsgDiv = document.createElement('div');
+      imgMsgDiv.className = 'message bot';
+      imgMsgDiv.innerHTML = `
+        <div class="avatar"><i class="fas fa-robot"></i></div>
+        <div class="bubble">
+          <div class="message-text">✨ Here's your creation:</div>
+          <br><img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')">
+          <div class="message-actions"><button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button></div>
+        </div>
+      `;
+      chatContainer.appendChild(imgMsgDiv);
+      imgMsgDiv.querySelector('.speak-msg').onclick = () => speakWithSelectedVoice(`Here's your image of ${prompt}`);
+      
+      await saveMessage('assistant', `Generated image: ${prompt}`, imageUrl);
+      userInput.value = '';
+      scrollToBottom();
+      await loadAllChats();
+    } else {
+      showToast("Describe the image you want to create!", "info");
+    }
+  });
+  
   sendBtn.addEventListener('click', () => sendMessage());
   userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1031,20 +1881,30 @@
     }
   });
   
+  // Initialize app
   window.addEventListener('load', () => {
     setTimeout(() => {
-      splashScreen.style.opacity = '0';
-      setTimeout(() => {
-        splashScreen.style.display = 'none';
-        appDiv.style.opacity = '1';
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> Online';
-      }, 800);
-    }, 2000);
+      if (splashScreen.style.display !== 'none') {
+        splashScreen.style.opacity = '0';
+        setTimeout(() => {
+          splashScreen.style.display = 'none';
+          appDiv.style.opacity = '1';
+        }, 500);
+      }
+    }, 5000);
+    
+    anonymousSignIn();
   });
   
-  hljs.highlightAll();
+  // Initialize speech synthesis voices
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      console.log("Voices loaded");
+    };
+  }
   
-  console.log("✅ Vortex AI Ready | API calls routed through /api/chat for security");
+  hljs.highlightAll();
+  console.log("✅ Vortex AI Fully Loaded | Firebase Realtime DB | Sidebar on Left | 6 Unique Voices | Cross-Chat Memory");
 </script>
 </body>
 </html>
