@@ -8,10 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <!-- Firebase SDKs for Realtime Database -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <style>
     * {
       margin: 0;
@@ -84,8 +80,7 @@
       height: 100dvh;
       display: flex;
       flex-direction: column;
-      opacity: 0;
-      transition: opacity 0.5s ease;
+      opacity: 1;
       position: relative;
     }
 
@@ -388,7 +383,6 @@
       margin-top: 1rem;
     }
 
-    /* Menu Button */
     .menu-btn {
       background: rgba(0, 212, 255, 0.1);
       border: none;
@@ -404,7 +398,6 @@
       transform: scale(1.05);
     }
 
-    /* New Chat Button */
     .new-chat-btn {
       background: linear-gradient(135deg, #00ffff, #3b82f6);
       border: none;
@@ -426,8 +419,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
     }
     .logo {
       display: flex;
@@ -442,7 +433,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     }
     .logo-icon i { font-size: 1.3rem; color: white; }
     .logo h1 { font-size: 1.3rem; background: linear-gradient(135deg, #fff, #00ffff); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -471,7 +461,6 @@
       flex-direction: column;
       gap: 0.8rem;
       scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
     }
     .chat-container::-webkit-scrollbar { width: 3px; }
     .chat-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
@@ -533,16 +522,12 @@
       cursor: pointer;
       opacity: 0;
       transition: opacity 0.2s;
-      backdrop-filter: blur(4px);
     }
     .edit-message-btn { right: 16px; color: #00ffff; }
     .delete-message-btn { right: -8px; color: #ef4444; }
     .message.user:hover .edit-message-btn,
     .message.user:hover .delete-message-btn {
       opacity: 1;
-    }
-    @media (max-width: 768px) {
-      .edit-message-btn, .delete-message-btn { opacity: 0.6; }
     }
 
     .code-block {
@@ -551,7 +536,6 @@
       border-radius: 10px;
       margin: 8px 0;
       overflow-x: auto;
-      border: 1px solid #30363d;
     }
     .code-header {
       display: flex;
@@ -567,9 +551,6 @@
       border: none;
       color: #58a6ff;
       cursor: pointer;
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 6px;
     }
 
     .message-actions {
@@ -578,7 +559,6 @@
       margin-top: 10px;
       padding-top: 6px;
       border-top: 1px solid rgba(0, 212, 255, 0.15);
-      flex-wrap: wrap;
     }
     .action-icon {
       background: none;
@@ -591,7 +571,6 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: all 0.2s;
     }
     .action-icon:hover { background: rgba(0, 255, 255, 0.15); color: #00ffff; }
 
@@ -617,7 +596,6 @@
       border-radius: 10px;
       margin-top: 6px;
       cursor: pointer;
-      border: 1px solid rgba(0, 212, 255, 0.4);
     }
 
     .input-wrapper {
@@ -626,7 +604,6 @@
       backdrop-filter: blur(20px);
       border-top: 1px solid rgba(0, 212, 255, 0.15);
     }
-    .input-container { max-width: 100%; margin: 0 auto; }
     .input-box {
       background: rgba(20, 30, 45, 0.9);
       border-radius: 2rem;
@@ -636,7 +613,7 @@
       gap: 6px;
       padding: 0.3rem 0.3rem 0.3rem 1rem;
     }
-    .input-box:focus-within { border-color: #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.15); }
+    .input-box:focus-within { border-color: #00ffff; }
     #userInput {
       flex: 1;
       background: transparent;
@@ -657,9 +634,8 @@
       border-radius: 50%;
       color: #94a3b8;
       cursor: pointer;
-      transition: all 0.2s;
     }
-    .action-btn:hover { background: #00ffff; color: #0a0a0f; transform: scale(1.05); }
+    .action-btn:hover { background: #00ffff; color: #0a0a0f; }
     .send-btn { background: linear-gradient(135deg, #00ffff, #3b82f6); color: white; }
 
     .voice-overlay {
@@ -677,11 +653,6 @@
       gap: 6px;
       z-index: 1000;
       border: 1px solid #00ffff;
-      animation: fadeUp 0.2s ease;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
     .wave-container { display: flex; gap: 4px; height: 30px; align-items: center; }
     .wave {
@@ -691,8 +662,8 @@
       animation: waveAnim 0.6s infinite ease alternate;
     }
     @keyframes waveAnim {
-      0% { transform: scaleY(0.5); opacity: 0.5; height: 10px; }
-      100% { transform: scaleY(1.2); opacity: 1; height: 25px; }
+      0% { transform: scaleY(0.5); height: 10px; }
+      100% { transform: scaleY(1.2); height: 25px; }
     }
 
     .footer-note {
@@ -741,18 +712,18 @@
     <div class="splash-logo"><i class="fas fa-vortex"></i></div>
     <div class="splash-text">VORTEX AI</div>
     <div class="splash-loader"><div class="splash-loader-bar"></div></div>
-    <div style="margin-top: 12px; font-size: 0.7rem; color: #4a5568;" id="splashStatus">Initializing Neural Core...</div>
+    <div style="margin-top: 12px; font-size: 0.7rem; color: #4a5568;" id="splashStatus">Loading...</div>
   </div>
 </div>
 
-<div class="app" id="app">
+<div class="app" id="app" style="display: none;">
   <div class="header">
     <div class="logo">
       <div class="logo-icon"><i class="fas fa-robot"></i></div>
       <h1>Vortex AI</h1>
     </div>
     <div class="header-actions">
-      <div class="status-badge" id="statusBadge"><i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> <span>Connecting</span></div>
+      <div class="status-badge" id="statusBadge"><i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Ready</span></div>
       <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
     </div>
   </div>
@@ -767,11 +738,11 @@
           • 📎 Upload images or PDFs for analysis<br>
           • 🎨 Click the image button to generate AI art<br>
           • 🎤 Press and hold the mic to speak<br>
-          • ✏️ Hover over your message → edit or delete ✏️<br>
+          • ✏️ Hover over your message → edit or delete<br>
           • 📚 Chat history with search and pin<br>
           • 💾 Cross-chat memory (I remember across conversations!)<br>
-          • 🎙️ Choose your preferred voice (6 unique voices with different pitches)<br>
-          • 📄 Export chats as PDF/TXT<br><br>
+          • 🎙️ Choose your preferred voice (6 unique voices)<br>
+          • 📄 Export chats as TXT<br><br>
           Ask me anything!
         </div>
       </div>
@@ -782,13 +753,11 @@
     <div class="input-container">
       <div class="input-box">
         <textarea id="userInput" rows="1" placeholder="Ask me anything..."></textarea>
-        <div class="action-buttons">
-          <button class="action-btn" id="attachBtn" title="Upload Image/Document"><i class="fas fa-paperclip"></i></button>
-          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display: none;">
-          <button class="action-btn" id="generateImageBtn" title="Generate AI Image"><i class="fas fa-image"></i></button>
-          <button class="action-btn" id="voiceBtn" title="Press and hold to speak"><i class="fas fa-microphone"></i></button>
-          <button class="action-btn send-btn" id="sendBtn"><i class="fas fa-arrow-up"></i></button>
-        </div>
+        <button class="action-btn" id="attachBtn" title="Upload"><i class="fas fa-paperclip"></i></button>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display: none;">
+        <button class="action-btn" id="generateImageBtn" title="Generate Image"><i class="fas fa-image"></i></button>
+        <button class="action-btn" id="voiceBtn" title="Hold to speak"><i class="fas fa-microphone"></i></button>
+        <button class="action-btn send-btn" id="sendBtn"><i class="fas fa-arrow-up"></i></button>
       </div>
       <div id="filePreviewArea"></div>
     </div>
@@ -796,7 +765,6 @@
   <div class="footer-note">Vortex AI • Press & Hold Mic to Speak</div>
 </div>
 
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <h3><i class="fas fa-comments"></i> Chats</h3>
@@ -807,90 +775,64 @@
     <input type="text" id="searchChatsInput" placeholder="🔍 Search chats...">
   </div>
   <div class="chats-list" id="chatsList">
-    <div style="text-align: center; padding: 2rem; color: #64748b;">Loading chats...</div>
+    <div style="text-align: center; padding: 2rem; color: #64748b;">No chats yet</div>
   </div>
-  <div class="profile-section" id="profileSection">
+  <div class="profile-section">
     <div class="profile-card" id="profileCard">
       <div class="profile-avatar" id="profileAvatar">
         <i class="fas fa-user-astronaut"></i>
       </div>
       <div class="profile-info">
-        <div class="profile-name" id="profileName">Guest User</div>
-        <div class="profile-email" id="profileEmail">Not signed in</div>
+        <div class="profile-name" id="profileName">User</div>
+        <div class="profile-email" id="profileEmail">Local</div>
       </div>
       <i class="fas fa-chevron-right" style="color: #64748b;"></i>
     </div>
   </div>
 </div>
 
-<!-- Profile Modal -->
 <div class="modal-overlay" id="profileModal">
   <div class="profile-modal">
     <div class="modal-header">
       <h3><i class="fas fa-user-circle"></i> Your Profile</h3>
       <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
     </div>
-    <div id="profileModalContent">
-      <div class="profile-field">
-        <label>Your Name</label>
-        <input type="text" id="userDisplayName" placeholder="How should I call you?">
-      </div>
-      <div class="profile-field">
-        <label>Personal Info (I'll remember this)</label>
-        <textarea id="userPersonalInfo" placeholder="e.g., I'm a developer, I love Python, my birthday is in March..."></textarea>
-      </div>
-      <div class="profile-field">
-        <label>Preferred Voice</label>
-        <div id="voiceOptionsList"></div>
-      </div>
-      <button class="save-profile-btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save Preferences</button>
+    <div class="profile-field">
+      <label>Your Name</label>
+      <input type="text" id="userDisplayName" placeholder="How should I call you?">
     </div>
-  </div>
-</div>
-
-<!-- Export Modal -->
-<div class="modal-overlay" id="exportModal">
-  <div class="profile-modal" style="max-width: 350px;">
-    <div class="modal-header">
-      <h3><i class="fas fa-download"></i> Export Chat</h3>
-      <button class="close-modal" id="closeExportBtn"><i class="fas fa-times"></i></button>
+    <div class="profile-field">
+      <label>Personal Info (I'll remember this)</label>
+      <textarea id="userPersonalInfo" placeholder="e.g., I'm a developer, I love Python..."></textarea>
     </div>
-    <div class="export-options">
-      <button id="exportTxtBtn"><i class="fas fa-file-alt"></i> TXT</button>
-      <button id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+    <div class="profile-field">
+      <label>Preferred Voice</label>
+      <div id="voiceOptionsList"></div>
     </div>
+    <button class="save-profile-btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save Preferences</button>
   </div>
 </div>
 
 <script>
-  // ==================== FIREBASE REALTIME DATABASE INITIALIZATION ====================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBD21w845BJM_RMz90s-3Hxj80nrhMxly4",
-    authDomain: "vortex-ai-56177.firebaseapp.com",
-    databaseURL: "https://vortex-ai-56177-default-rtdb.firebaseio.com/",
-    projectId: "vortex-ai-56177",
-    storageBucket: "vortex-ai-56177.firebasestorage.app",
-    messagingSenderId: "746045419077",
-    appId: "1:746045419077:web:250d5360ee6f493d77bd2c",
-    measurementId: "G-7E814PXDZZ"
-  };
-  
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-  const auth = firebase.auth();
-  
-  // ==================== GLOBAL VARIABLES ====================
-  let currentUser = null;
+  // ==================== LOCAL STORAGE ONLY (NO FIREBASE DEPENDENCY) ====================
   let currentChatId = null;
   let currentChatMessages = [];
   let allChats = [];
   let selectedVoice = 'Jesse';
   let isResponding = false;
   let typingDiv = null;
-  let greetingMsg = document.getElementById('greetingMessage');
-  let firstMessageSent = false;
   let pendingFile = null;
+  let firstMessageSent = false;
+  
+  // Voice list with different pitches
+  const voiceList = [
+    { name: 'Jesse', gender: 'male', pitch: 1.2, rate: 1.0, icon: 'fa-mars', description: 'Deep, authoritative male voice' },
+    { name: 'Fabian', gender: 'male', pitch: 1.0, rate: 1.1, icon: 'fa-mars', description: 'Warm, friendly male voice' },
+    { name: 'Joseph', gender: 'male', pitch: 0.85, rate: 0.95, icon: 'fa-mars', description: 'Calm, gentle male voice' },
+    { name: 'Roselyn', gender: 'female', pitch: 1.3, rate: 1.0, icon: 'fa-venus', description: 'Bright, energetic female voice' },
+    { name: 'Catherine', gender: 'female', pitch: 1.1, rate: 1.05, icon: 'fa-venus', description: 'Smooth, professional female voice' },
+    { name: 'Maria', gender: 'female', pitch: 0.95, rate: 0.9, icon: 'fa-venus', description: 'Soft, soothing female voice' }
+  ];
   
   // DOM Elements
   const chatContainer = document.getElementById('chatContainer');
@@ -902,9 +844,7 @@
   const generateImageBtn = document.getElementById('generateImageBtn');
   const filePreviewArea = document.getElementById('filePreviewArea');
   const splashScreen = document.getElementById('splashScreen');
-  const splashStatus = document.getElementById('splashStatus');
   const appDiv = document.getElementById('app');
-  const statusBadge = document.getElementById('statusBadge');
   const menuBtn = document.getElementById('menuBtn');
   const sidebar = document.getElementById('sidebar');
   const closeSidebarBtn = document.getElementById('closeSidebarBtn');
@@ -918,19 +858,9 @@
   const userDisplayName = document.getElementById('userDisplayName');
   const userPersonalInfo = document.getElementById('userPersonalInfo');
   const profileName = document.getElementById('profileName');
-  const profileEmail = document.getElementById('profileEmail');
-  const exportModal = document.getElementById('exportModal');
+  const greetingMsg = document.getElementById('greetingMessage');
   
-  // ==================== VOICE SYSTEM WITH DIFFERENT PITCHES ====================
-  const voiceList = [
-    { name: 'Jesse', gender: 'male', pitch: 1.2, rate: 1.0, icon: 'fa-mars', description: 'Deep, authoritative male voice' },
-    { name: 'Fabian', gender: 'male', pitch: 1.0, rate: 1.1, icon: 'fa-mars', description: 'Warm, friendly male voice' },
-    { name: 'Joseph', gender: 'male', pitch: 0.85, rate: 0.95, icon: 'fa-mars', description: 'Calm, gentle male voice' },
-    { name: 'Roselyn', gender: 'female', pitch: 1.3, rate: 1.0, icon: 'fa-venus', description: 'Bright, energetic female voice' },
-    { name: 'Catherine', gender: 'female', pitch: 1.1, rate: 1.05, icon: 'fa-venus', description: 'Smooth, professional female voice' },
-    { name: 'Maria', gender: 'female', pitch: 0.95, rate: 0.9, icon: 'fa-venus', description: 'Soft, soothing female voice' }
-  ];
-  
+  // ==================== VOICE FUNCTIONS (MANUAL ONLY) ====================
   function populateVoiceOptions() {
     const container = document.getElementById('voiceOptionsList');
     if (!container) return;
@@ -951,172 +881,88 @@
         selectedVoice = voice.name;
         document.querySelectorAll('.voice-option').forEach(opt => opt.classList.remove('selected'));
         option.classList.add('selected');
-        saveUserProfile();
+        saveData();
       };
       const sampleBtn = option.querySelector('.voice-sample');
       sampleBtn.onclick = (e) => {
         e.stopPropagation();
-        sampleVoice(voice.name);
+        speakText(`Hello! This is ${voice.name}'s voice. How can I help you today?`, voice);
       };
       container.appendChild(option);
     });
   }
   
-  function sampleVoice(voiceName) {
-    const voice = voiceList.find(v => v.name === voiceName);
-    if (voice) {
-      const utterance = new SpeechSynthesisUtterance(`Hello! This is ${voiceName}'s voice. How can I help you today?`);
-      utterance.pitch = voice.pitch;
-      utterance.rate = voice.rate;
-      const availableVoices = window.speechSynthesis.getVoices();
-      if (voice.gender === 'male') {
-        const maleVoice = availableVoices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Microsoft David'));
-        if (maleVoice) utterance.voice = maleVoice;
-      } else {
-        const femaleVoice = availableVoices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
-        if (femaleVoice) utterance.voice = femaleVoice;
-      }
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-  
-  function speakWithSelectedVoice(text) {
+  function speakText(text, voicePref = null) {
     if (!text) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    const voicePref = voiceList.find(v => v.name === selectedVoice);
-    if (voicePref) {
-      utterance.pitch = voicePref.pitch;
-      utterance.rate = voicePref.rate;
-      const availableVoices = window.speechSynthesis.getVoices();
-      if (voicePref.gender === 'male') {
-        const maleVoice = availableVoices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Microsoft David'));
-        if (maleVoice) utterance.voice = maleVoice;
-      } else {
-        const femaleVoice = availableVoices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
-        if (femaleVoice) utterance.voice = femaleVoice;
-      }
+    const voice = voicePref || voiceList.find(v => v.name === selectedVoice);
+    if (voice) {
+      utterance.pitch = voice.pitch;
+      utterance.rate = voice.rate;
     }
     window.speechSynthesis.speak(utterance);
   }
   
-  // ==================== AUTH & USER PROFILE (Firebase Realtime DB) ====================
-  function anonymousSignIn() {
-    splashStatus.textContent = 'Connecting to secure vault...';
-    
-    auth.signInAnonymously()
-      .then((userCredential) => {
-        currentUser = userCredential.user;
-        splashStatus.textContent = 'Loading your profile...';
-        loadUserProfile();
-      })
-      .catch((error) => {
-        console.error("Auth error:", error);
-        splashStatus.textContent = 'Retrying connection...';
-        setTimeout(anonymousSignIn, 2000);
-      });
-  }
-  
-  async function loadUserProfile() {
-    if (!currentUser) return;
-    
-    const userRef = database.ref(`users/${currentUser.uid}`);
-    userRef.once('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        userDisplayName.value = data.displayName || '';
-        userPersonalInfo.value = data.personalInfo || '';
-        selectedVoice = data.selectedVoice || 'Jesse';
-        profileName.textContent = data.displayName || 'Guest User';
-      } else {
-        selectedVoice = 'Jesse';
-        userRef.set({
-          displayName: '',
-          personalInfo: '',
-          selectedVoice: 'Jesse',
-          createdAt: Date.now()
-        });
+  // ==================== STORAGE ====================
+  function saveData() {
+    const data = {
+      chats: allChats,
+      currentChatId: currentChatId,
+      messages: currentChatMessages,
+      profile: {
+        displayName: userDisplayName.value,
+        personalInfo: userPersonalInfo.value,
+        selectedVoice: selectedVoice
       }
-      profileEmail.textContent = currentUser.isAnonymous ? 'Guest User' : (currentUser.email || 'Anonymous');
-      profileName.textContent = userDisplayName.value || 'Guest User';
-      populateVoiceOptions();
-      loadAllChats();
-      
-      setTimeout(() => {
-        splashScreen.style.opacity = '0';
-        setTimeout(() => {
-          splashScreen.style.display = 'none';
-          appDiv.style.opacity = '1';
-          statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Online</span>';
-        }, 500);
-      }, 500);
-    });
+    };
+    localStorage.setItem('vortex_data', JSON.stringify(data));
   }
   
-  async function saveUserProfile() {
-    if (!currentUser) return;
-    
-    const userRef = database.ref(`users/${currentUser.uid}`);
-    await userRef.update({
-      displayName: userDisplayName.value,
-      personalInfo: userPersonalInfo.value,
-      selectedVoice: selectedVoice,
-      updatedAt: Date.now()
-    });
-    profileName.textContent = userDisplayName.value || 'Guest User';
-    showToast('Profile saved! I\'ll remember your preferences.', 'success');
+  function loadData() {
+    const saved = localStorage.getItem('vortex_data');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        allChats = data.chats || [];
+        currentChatId = data.currentChatId;
+        currentChatMessages = data.messages || [];
+        if (data.profile) {
+          userDisplayName.value = data.profile.displayName || '';
+          userPersonalInfo.value = data.profile.personalInfo || '';
+          selectedVoice = data.profile.selectedVoice || 'Jesse';
+          profileName.textContent = userDisplayName.value || 'User';
+        }
+        populateVoiceOptions();
+        renderChatsList();
+        if (currentChatMessages.length > 0) {
+          displayMessages(currentChatMessages);
+        }
+        return true;
+      } catch(e) { console.error(e); }
+    }
+    return false;
   }
   
-  // ==================== CHAT MANAGEMENT (Firebase Realtime DB) ====================
-  async function createNewChat() {
-    if (!currentUser) return null;
-    
-    const newChatRef = database.ref(`chats/${currentUser.uid}`).push();
-    const chatId = newChatRef.key;
+  // ==================== CHAT MANAGEMENT ====================
+  function createNewChat() {
     const newChat = {
-      id: chatId,
+      id: Date.now().toString(),
       title: `New Chat ${new Date().toLocaleTimeString()}`,
       pinned: false,
       messageCount: 0,
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
-    
-    await newChatRef.set(newChat);
-    currentChatId = chatId;
+    allChats.unshift(newChat);
+    currentChatId = newChat.id;
     currentChatMessages = [];
     clearChatDisplay();
     addInitialGreeting();
-    await loadAllChats();
+    renderChatsList();
+    saveData();
     closeSidebar();
-    return chatId;
-  }
-  
-  async function loadAllChats() {
-    if (!currentUser) return;
-    
-    const chatsRef = database.ref(`chats/${currentUser.uid}`);
-    chatsRef.once('value', (snapshot) => {
-      const data = snapshot.val();
-      allChats = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          allChats.push({ id: key, ...data[key] });
-        });
-        allChats.sort((a, b) => {
-          if (a.pinned !== b.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
-          return (b.updatedAt || 0) - (a.updatedAt || 0);
-        });
-      }
-      renderChatsList();
-      
-      if (allChats.length === 0 && !currentChatId) {
-        createNewChat();
-      } else if (!currentChatId && allChats.length > 0) {
-        loadChat(allChats[0].id);
-      }
-    });
+    return currentChatId;
   }
   
   function renderChatsList(searchTerm = '') {
@@ -1127,7 +973,7 @@
       );
     }
     
-    if (!filteredChats || filteredChats.length === 0) {
+    if (filteredChats.length === 0) {
       chatsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b;">No chats found</div>';
       return;
     }
@@ -1137,10 +983,10 @@
         <div class="chat-title">
           <span>${escapeHtml((chat.title || 'New Chat').substring(0, 30))}</span>
           <div class="chat-actions">
-            <button class="chat-action-btn pin-btn ${chat.pinned ? 'pinned' : ''}" data-chat-id="${chat.id}" data-action="pin">
+            <button class="chat-action-btn pin-btn ${chat.pinned ? 'pinned' : ''}" data-chat-id="${chat.id}">
               <i class="fas fa-thumbtack"></i>
             </button>
-            <button class="chat-action-btn delete-chat-btn" data-chat-id="${chat.id}" data-action="delete">
+            <button class="chat-action-btn delete-chat-btn" data-chat-id="${chat.id}">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -1160,175 +1006,140 @@
     });
     
     document.querySelectorAll('.pin-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        await togglePinChat(btn.dataset.chatId);
+        togglePinChat(btn.dataset.chatId);
       });
     });
     
     document.querySelectorAll('.delete-chat-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        await deleteChat(btn.dataset.chatId);
+        deleteChat(btn.dataset.chatId);
       });
     });
   }
   
-  async function loadChat(chatId) {
-    if (!currentUser) return;
+  function loadChat(chatId) {
     currentChatId = chatId;
-    
-    const messagesRef = database.ref(`messages/${currentUser.uid}/${chatId}`);
-    messagesRef.once('value', (snapshot) => {
-      const data = snapshot.val();
-      currentChatMessages = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          currentChatMessages.push({ id: key, ...data[key] });
-        });
-        currentChatMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-      }
-      
-      clearChatDisplay();
-      if (currentChatMessages.length === 0) {
-        addInitialGreeting();
+    // Load messages for this chat
+    const saved = localStorage.getItem('vortex_data');
+    if (saved) {
+      const data = JSON.parse(saved);
+      const savedMessages = localStorage.getItem(`vortex_msgs_${chatId}`);
+      if (savedMessages) {
+        currentChatMessages = JSON.parse(savedMessages);
+      } else if (data.messages && data.currentChatId === chatId) {
+        currentChatMessages = data.messages;
       } else {
-        displayMessages(currentChatMessages);
+        currentChatMessages = [];
       }
-      closeSidebar();
-    });
+    } else {
+      currentChatMessages = [];
+    }
+    
+    clearChatDisplay();
+    if (currentChatMessages.length === 0) {
+      addInitialGreeting();
+    } else {
+      displayMessages(currentChatMessages);
+    }
+    saveData();
+    closeSidebar();
   }
   
-  async function saveMessage(role, content, imageUrl = null) {
-    if (!currentUser || !currentChatId) return null;
+  function saveMessage(role, content, imageUrl = null) {
+    if (!currentChatId) return;
     
-    const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}`).push();
-    const messageId = messageRef.key;
     const message = {
-      id: messageId,
+      id: Date.now().toString(),
       role: role,
       content: content,
       timestamp: Date.now()
     };
     if (imageUrl) message.imageUrl = imageUrl;
     
-    await messageRef.set(message);
     currentChatMessages.push(message);
+    localStorage.setItem(`vortex_msgs_${currentChatId}`, JSON.stringify(currentChatMessages));
     
-    // Update chat message count and updated time
-    const chatRef = database.ref(`chats/${currentUser.uid}/${currentChatId}`);
-    await chatRef.update({
-      messageCount: currentChatMessages.length,
-      updatedAt: Date.now()
-    });
-    
-    // Update chat title if it's the first user message
-    if (role === 'user' && currentChatMessages.length === 1) {
-      const newTitle = content.substring(0, 40) + (content.length > 40 ? '...' : '');
-      await chatRef.update({ title: newTitle });
-      const chatIndex = allChats.findIndex(c => c.id === currentChatId);
-      if (chatIndex !== -1) allChats[chatIndex].title = newTitle;
+    const chatIndex = allChats.findIndex(c => c.id === currentChatId);
+    if (chatIndex !== -1) {
+      allChats[chatIndex].messageCount = currentChatMessages.length;
+      allChats[chatIndex].updatedAt = Date.now();
+      if (role === 'user' && currentChatMessages.length === 1) {
+        allChats[chatIndex].title = content.substring(0, 40) + (content.length > 40 ? '...' : '');
+      }
       renderChatsList();
     }
-    
-    return messageId;
+    saveData();
   }
   
-  async function togglePinChat(chatId) {
+  function togglePinChat(chatId) {
     const chat = allChats.find(c => c.id === chatId);
     if (chat) {
-      const newPinned = !chat.pinned;
-      const chatRef = database.ref(`chats/${currentUser.uid}/${chatId}`);
-      await chatRef.update({ pinned: newPinned });
-      chat.pinned = newPinned;
+      chat.pinned = !chat.pinned;
       allChats.sort((a, b) => {
         if (a.pinned !== b.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
         return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
       renderChatsList();
-      showToast(newPinned ? 'Pinned' : 'Unpinned', 'success');
+      saveData();
     }
   }
   
-  async function deleteChat(chatId) {
-    if (!confirm('Delete this chat? This cannot be undone.')) return;
+  function deleteChat(chatId) {
+    if (!confirm('Delete this chat?')) return;
     
-    // Delete all messages in this chat
-    const messagesRef = database.ref(`messages/${currentUser.uid}/${chatId}`);
-    await messagesRef.remove();
-    
-    // Delete the chat itself
-    const chatRef = database.ref(`chats/${currentUser.uid}/${chatId}`);
-    await chatRef.remove();
-    
+    localStorage.removeItem(`vortex_msgs_${chatId}`);
     allChats = allChats.filter(c => c.id !== chatId);
     if (currentChatId === chatId) {
       if (allChats.length > 0) {
-        await loadChat(allChats[0].id);
+        loadChat(allChats[0].id);
       } else {
-        await createNewChat();
+        createNewChat();
       }
     }
     renderChatsList();
-    showToast('Chat deleted', 'info');
+    saveData();
   }
   
-  // ==================== CROSS-CHAT MEMORY ====================
-  async function getRelevantMemories(query) {
-    if (!currentUser) return '';
-    
+  // ==================== MEMORY ====================
+  function getRelevantMemories() {
     let memoryContext = '';
-    
-    // Get user personal info
-    const userRef = database.ref(`users/${currentUser.uid}`);
-    const userSnapshot = await userRef.once('value');
-    const userData = userSnapshot.val();
-    if (userData && userData.personalInfo) {
-      memoryContext += `[USER INFO: ${userData.personalInfo}]\n`;
+    if (userPersonalInfo.value) {
+      memoryContext += `[USER INFO: ${userPersonalInfo.value}]\n`;
     }
-    if (userData && userData.displayName) {
-      memoryContext += `[USER NAME: ${userData.displayName}]\n`;
+    if (userDisplayName.value) {
+      memoryContext += `[USER NAME: ${userDisplayName.value}]\n`;
     }
     
-    // Get recent messages from last 3 chats for context
-    const chatsRef = database.ref(`chats/${currentUser.uid}`);
-    const chatsSnapshot = await chatsRef.once('value');
-    const chats = chatsSnapshot.val();
-    
-    if (chats) {
-      const chatList = Object.keys(chats).map(key => ({ id: key, ...chats[key] }));
-      chatList.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      const recentChats = chatList.slice(0, 3);
-      
-      for (const chat of recentChats) {
-        if (chat.id !== currentChatId) {
-          const messagesRef = database.ref(`messages/${currentUser.uid}/${chat.id}`);
-          const messagesSnapshot = await messagesRef.once('value');
-          const messages = messagesSnapshot.val();
-          if (messages) {
-            const messageList = Object.keys(messages).map(key => ({ ...messages[key] }));
-            messageList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            const recentMessages = messageList.slice(0, 3);
-            recentMessages.forEach(msg => {
-              memoryContext += `[Previous conversation "${chat.title || 'Chat'}": ${msg.role} said: ${msg.content.substring(0, 200)}]\n`;
-            });
-          }
+    // Get recent messages from last 3 chats
+    const recentChats = allChats.slice(0, 3);
+    for (const chat of recentChats) {
+      if (chat.id !== currentChatId) {
+        const savedMsgs = localStorage.getItem(`vortex_msgs_${chat.id}`);
+        if (savedMsgs) {
+          const msgs = JSON.parse(savedMsgs);
+          const recent = msgs.slice(-3);
+          recent.forEach(msg => {
+            memoryContext += `[Previous: ${msg.role}: ${msg.content.substring(0, 200)}]\n`;
+          });
         }
       }
     }
     
-    // Also include current chat history for continuity
+    // Current chat context
     if (currentChatMessages.length > 0) {
       const recentCurrent = currentChatMessages.slice(-5);
       recentCurrent.forEach(msg => {
-        memoryContext += `[In this chat: ${msg.role} said: ${msg.content.substring(0, 200)}]\n`;
+        memoryContext += `[In this chat: ${msg.role}: ${msg.content.substring(0, 200)}]\n`;
       });
     }
     
     return memoryContext;
   }
   
-  // ==================== DISPLAY FUNCTIONS ====================
+  // ==================== DISPLAY ====================
   function clearChatDisplay() {
     chatContainer.innerHTML = '';
     firstMessageSent = false;
@@ -1340,7 +1151,7 @@
     greetingDiv.innerHTML = `
       <div class="avatar"><i class="fas fa-brain"></i></div>
       <div class="bubble">
-        <div class="message-text">✨ Welcome back! I remember our conversations. Ask me anything!</div>
+        <div class="message-text">✨ Welcome! I remember our conversations. Ask me anything!</div>
       </div>
     `;
     chatContainer.appendChild(greetingDiv);
@@ -1366,8 +1177,8 @@
       <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
       <div class="bubble">
         <div class="message-text">${escapeHtml(text)}</div>
-        <button class="edit-message-btn" onclick="editExistingMessage('${messageId}', this)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
-        <button class="delete-message-btn" onclick="deleteExistingMessage('${messageId}', this)" title="Delete"><i class="fas fa-trash"></i></button>
+        <button class="edit-message-btn" onclick="editMessage('${messageId}', this)"><i class="fas fa-pencil-alt"></i></button>
+        <button class="delete-message-btn" onclick="deleteMessage('${messageId}', this)"><i class="fas fa-trash"></i></button>
         ${imageUrl ? `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">` : ''}
       </div>
     `;
@@ -1393,150 +1204,113 @@
     
     msgDiv.querySelector('.copy-msg').onclick = () => {
       navigator.clipboard.writeText(text);
-      showToast('Copied!', 'success');
+      showToast('Copied!');
     };
-    msgDiv.querySelector('.speak-msg').onclick = () => speakWithSelectedVoice(text);
+    msgDiv.querySelector('.speak-msg').onclick = () => speakText(text);
     hljs.highlightAll();
   }
   
-  window.editExistingMessage = async function(messageId, btn) {
+  window.editMessage = function(messageId, btn) {
     const msgDiv = btn.closest('.message');
     const textDiv = msgDiv.querySelector('.message-text');
     const oldText = textDiv.innerText;
     const newText = prompt('Edit your message:', oldText);
     if (newText && newText !== oldText) {
-      const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}/${messageId}`);
-      await messageRef.update({ content: newText, edited: true });
-      
       const msgIndex = currentChatMessages.findIndex(m => m.id === messageId);
-      if (msgIndex !== -1) currentChatMessages[msgIndex].content = newText;
-      textDiv.innerHTML = escapeHtml(newText);
-      showToast('Message updated', 'success');
+      if (msgIndex !== -1) {
+        currentChatMessages[msgIndex].content = newText;
+        textDiv.innerHTML = escapeHtml(newText);
+        localStorage.setItem(`vortex_msgs_${currentChatId}`, JSON.stringify(currentChatMessages));
+        saveData();
+        showToast('Message updated');
+      }
     }
   };
   
-  window.deleteExistingMessage = async function(messageId, btn) {
+  window.deleteMessage = function(messageId, btn) {
     if (confirm('Delete this message?')) {
-      const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}/${messageId}`);
-      await messageRef.remove();
-      
       const msgIndex = currentChatMessages.findIndex(m => m.id === messageId);
-      if (msgIndex !== -1) currentChatMessages.splice(msgIndex, 1);
-      btn.closest('.message').remove();
-      
-      // Update chat message count
-      const chatRef = database.ref(`chats/${currentUser.uid}/${currentChatId}`);
-      await chatRef.update({ messageCount: currentChatMessages.length });
-      
-      showToast('Message deleted', 'info');
+      if (msgIndex !== -1) {
+        currentChatMessages.splice(msgIndex, 1);
+        btn.closest('.message').remove();
+        localStorage.setItem(`vortex_msgs_${currentChatId}`, JSON.stringify(currentChatMessages));
+        const chatIndex = allChats.findIndex(c => c.id === currentChatId);
+        if (chatIndex !== -1) {
+          allChats[chatIndex].messageCount = currentChatMessages.length;
+          renderChatsList();
+        }
+        saveData();
+        showToast('Message deleted');
+      }
     }
   };
   
-  // ==================== API COMMUNICATION ====================
-  async function callVortexAPI(prompt, fileBase64 = null, mimeType = 'image/jpeg', memoryContext = '') {
+  // ==================== API ====================
+  async function callVortexAPI(prompt, fileBase64 = null, memoryContext = '') {
     try {
-      statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> <span>Thinking...</span>';
-      
       let fullPrompt = prompt;
-      if (memoryContext && memoryContext.trim()) {
-        fullPrompt = `IMPORTANT CONTEXT FROM OUR PREVIOUS CONVERSATIONS (USE THIS TO PERSONALIZE YOUR RESPONSE):
-${memoryContext}
-
-CURRENT QUESTION FROM USER: ${prompt}
-
-Please use the context above to provide a helpful, personalized response. Remember what the user told you about themselves.`;
+      if (memoryContext) {
+        fullPrompt = `Context from our conversations:\n${memoryContext}\n\nUser: ${prompt}\n\nPlease use the context to personalize your response.`;
       }
-      
-      if (userDisplayName.value && userDisplayName.value.trim()) {
-        fullPrompt = `The user's name is ${userDisplayName.value}. ` + fullPrompt;
+      if (userDisplayName.value) {
+        fullPrompt = `User's name is ${userDisplayName.value}. ` + fullPrompt;
       }
-      
-      const requestBody = {
-        message: fullPrompt,
-        image: fileBase64 ? { data: fileBase64, mimeType: mimeType } : null
-      };
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
       
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
+        body: JSON.stringify({ message: fullPrompt, image: fileBase64 ? { data: fileBase64, mimeType: 'image/jpeg' } : null })
       });
       
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
       const data = await response.json();
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Online</span>';
+      if (data.choices && data.choices[0]?.message?.content) {
         return data.choices[0].message.content;
       }
-      
       return "I'm here to help! What would you like to know?";
-      
     } catch (error) {
       console.error("API Error:", error);
-      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> <span>Error</span>';
-      return `I'm having trouble connecting. Please try again. Error: ${error.message}`;
+      return "Connection issue. Please try again.";
     }
   }
   
-  async function sendMessage(userText, retryFile = null) {
-    if (isResponding) {
-      showToast("Please wait for the current response to finish", "info");
-      return;
-    }
+  async function sendMessage() {
+    if (isResponding) return;
     
-    const text = userText || userInput.value.trim();
-    if (!text && !pendingFile && !retryFile) return;
+    const text = userInput.value.trim();
+    if (!text && !pendingFile) return;
     
     if (greetingMsg && !firstMessageSent) {
       greetingMsg.style.display = 'none';
       firstMessageSent = true;
     }
     
-    if (!currentChatId) {
-      await createNewChat();
-    }
+    if (!currentChatId) createNewChat();
     
-    const fileToSend = retryFile || pendingFile;
+    const fileToSend = pendingFile;
     const userImageUrl = fileToSend ? `data:${fileToSend.mime};base64,${fileToSend.base64}` : null;
     
-    // Save and display user message
-    await saveMessage('user', text || "Analyzing attachment", userImageUrl);
+    saveMessage('user', text || "Analyzing attachment", userImageUrl);
     displayUserMessage(text || "Analyzing attachment", userImageUrl);
     
     userInput.value = '';
     pendingFile = null;
     filePreviewArea.innerHTML = '';
     
-    // Get memory context for AI
-    const memoryContext = await getRelevantMemories(text);
+    const memoryContext = getRelevantMemories();
     
     showTypingIndicator();
     isResponding = true;
-    
-    const response = await callVortexAPI(text || "Describe this attachment", fileToSend?.base64, fileToSend?.mime, memoryContext);
-    
+    const response = await callVortexAPI(text || "Describe this attachment", fileToSend?.base64, memoryContext);
     hideTypingIndicator();
     isResponding = false;
     
-    // Save and display AI response
-    await saveMessage('assistant', response);
+    saveMessage('assistant', response);
     displayBotMessage(response);
-    
     scrollToBottom();
-    speakWithSelectedVoice(response);
+    // NO AUTO VOICE - user must click speak button
   }
   
-  // ==================== UTILITY FUNCTIONS ====================
+  // ==================== UTILITIES ====================
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')).replace(/\n/g, '<br>');
@@ -1547,39 +1321,29 @@ Please use the context above to provide a helpful, personalized response. Rememb
     return text.replace(codeBlockRegex, (match, lang, code) => {
       const escapedCode = escapeHtml(code.trim());
       return `<div class="code-block">
-        <div class="code-header">
-          <span>${lang || 'code'}</span>
-          <button class="copy-code-btn" onclick="window.copyCode(this, \`${escapedCode.replace(/`/g, '\\`')}\`)"><i class="fas fa-copy"></i> Copy</button>
-        </div>
-        <pre><code class="language-${lang || 'plaintext'}">${escapedCode}</code></pre>
+        <div class="code-header"><span>${lang || 'code'}</span><button class="copy-code-btn" onclick="copyCode(this, \`${escapedCode.replace(/`/g, '\\`')}\`)">Copy</button></div>
+        <pre><code>${escapedCode}</code></pre>
       </div>`;
     });
   }
   
   window.copyCode = function(btn, code) {
     navigator.clipboard.writeText(code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
-    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
   };
   
   function formatDate(timestamp) {
     if (!timestamp) return 'Just now';
-    const date = new Date(timestamp);
-    return date.toLocaleDateString();
+    return new Date(timestamp).toLocaleDateString();
   }
   
-  function showToast(message, type = 'info') {
+  function showToast(msg) {
     const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-      color: white; padding: 8px 16px; border-radius: 50px;
-      font-size: 0.8rem; z-index: 5000; animation: fadeUp 0.3s ease;
-      white-space: nowrap;
-    `;
-    toast.textContent = message;
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#3b82f6;color:white;padding:8px 16px;border-radius:50px;font-size:0.8rem;z-index:5000';
+    toast.textContent = msg;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => toast.remove(), 2000);
   }
   
   function scrollToBottom() {
@@ -1602,158 +1366,39 @@ Please use the context above to provide a helpful, personalized response. Rememb
   function closeSidebar() { sidebar.classList.remove('open'); }
   function openSidebar() { sidebar.classList.add('open'); }
   
-  // ==================== EXPORT FUNCTIONS ====================
-  async function exportChatAsTXT() {
-    if (!currentChatId) return;
-    
-    let content = `Vortex AI Chat Export\n${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
-    for (const msg of currentChatMessages) {
-      content += `[${msg.role.toUpperCase()}] (${new Date(msg.timestamp).toLocaleString()}):\n${msg.content}\n\n`;
-    }
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `vortex_chat_${currentChatId}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Exported as TXT', 'success');
-  }
-  
-  async function exportChatAsPDF() {
-    if (!currentChatId) return;
-    
-    let html = `
-      <html>
-      <head><title>Vortex AI Chat Export</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .message { margin: 10px 0; padding: 10px; border-radius: 8px; }
-        .user { background: #e3f2fd; }
-        .assistant { background: #f5f5f5; }
-        .role { font-weight: bold; }
-        .time { font-size: 10px; color: #666; }
-        hr { margin: 15px 0; }
-      </style>
-      </head>
-      <body>
-      <h1>Vortex AI Chat Export</h1>
-      <p>Exported: ${new Date().toLocaleString()}</p>
-      <hr>
-    `;
-    for (const msg of currentChatMessages) {
-      html += `
-        <div class="message ${msg.role}">
-          <div class="role">${msg.role.toUpperCase()}</div>
-          <div class="time">${new Date(msg.timestamp).toLocaleString()}</div>
-          <div>${msg.content.replace(/\n/g, '<br>')}</div>
-        </div>
-        <hr>
-      `;
-    }
-    html += '</body></html>';
-    
-    const blob = new Blob([html], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `vortex_chat_${currentChatId}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Exported as PDF', 'success');
-  }
-  
-  // ==================== EVENT LISTENERS ====================
-  menuBtn.addEventListener('click', openSidebar);
-  closeSidebarBtn.addEventListener('click', closeSidebar);
-  newChatBtn.addEventListener('click', async () => {
-    await createNewChat();
-    await loadAllChats();
-  });
-  
-  searchChatsInput.addEventListener('input', (e) => {
-    renderChatsList(e.target.value);
-  });
-  
-  profileCard.addEventListener('click', () => profileModal.classList.add('active'));
-  closeModalBtn.addEventListener('click', () => profileModal.classList.remove('active'));
-  saveProfileBtn.addEventListener('click', async () => {
-    await saveUserProfile();
-    profileModal.classList.remove('active');
-  });
-  
-  profileModal.addEventListener('click', (e) => {
-    if (e.target === profileModal) profileModal.classList.remove('active');
-  });
-  exportModal.addEventListener('click', (e) => {
-    if (e.target === exportModal) exportModal.classList.remove('active');
-  });
-  
-  document.getElementById('exportTxtBtn')?.addEventListener('click', () => {
-    exportChatAsTXT();
-    exportModal.classList.remove('active');
-  });
-  document.getElementById('exportPdfBtn')?.addEventListener('click', () => {
-    exportChatAsPDF();
-    exportModal.classList.remove('active');
-  });
-  
   // Voice recording
   let voicePressTimer = null;
-  let isVoicePressed = false;
   let activeRecognition = null;
   let voiceOverlay = null;
   
-  function createVoiceWaveOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'voice-overlay';
-    overlay.innerHTML = `<div class="wave-container"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div></div><div style="color:white; font-size:0.7rem;">🎤 Listening... Release to send</div>`;
-    document.body.appendChild(overlay);
-    return overlay;
-  }
-  
   function startVoiceRecording() {
     if (!('webkitSpeechRecognition' in window)) {
-      showToast("Voice recognition requires Chrome or Edge", "error");
+      showToast("Voice requires Chrome/Edge");
       return;
     }
-    
     const SpeechRecognition = window.webkitSpeechRecognition;
     activeRecognition = new SpeechRecognition();
     activeRecognition.lang = 'en-US';
     activeRecognition.interimResults = true;
-    activeRecognition.continuous = true;
     
-    voiceOverlay = createVoiceWaveOverlay();
+    voiceOverlay = document.createElement('div');
+    voiceOverlay.className = 'voice-overlay';
+    voiceOverlay.innerHTML = `<div class="wave-container"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div></div><div style="color:white;">🎤 Listening...</div>`;
+    document.body.appendChild(voiceOverlay);
+    
     let finalTranscript = '';
-    
-    activeRecognition.onresult = (event) => {
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        }
-      }
-      if (voiceOverlay && finalTranscript) {
-        const textDiv = voiceOverlay.querySelector('div:last-child');
-        if (textDiv) textDiv.innerHTML = `📝 "${finalTranscript.substring(0, 35)}${finalTranscript.length > 35 ? '...' : ''}"`;
+    activeRecognition.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
       }
     };
-    
     activeRecognition.onend = () => {
       if (voiceOverlay) voiceOverlay.remove();
       if (finalTranscript.trim()) {
         userInput.value = finalTranscript;
-        sendMessage(finalTranscript);
+        sendMessage();
       }
-      activeRecognition = null;
     };
-    
-    activeRecognition.onerror = () => {
-      if (voiceOverlay) voiceOverlay.remove();
-      showToast("Voice recognition error", "error");
-      activeRecognition = null;
-    };
-    
     activeRecognition.start();
   }
   
@@ -1765,146 +1410,85 @@ Please use the context above to provide a helpful, personalized response. Rememb
     if (voiceOverlay) voiceOverlay.remove();
   }
   
+  // ==================== EVENT LISTENERS ====================
+  menuBtn.addEventListener('click', openSidebar);
+  closeSidebarBtn.addEventListener('click', closeSidebar);
+  newChatBtn.addEventListener('click', () => { createNewChat(); renderChatsList(); });
+  searchChatsInput.addEventListener('input', (e) => renderChatsList(e.target.value));
+  profileCard.addEventListener('click', () => profileModal.classList.add('active'));
+  closeModalBtn.addEventListener('click', () => profileModal.classList.remove('active'));
+  saveProfileBtn.addEventListener('click', () => {
+    profileName.textContent = userDisplayName.value || 'User';
+    saveData();
+    profileModal.classList.remove('active');
+    showToast('Profile saved');
+  });
+  profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
+  
   voiceBtn.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    isVoicePressed = true;
-    voicePressTimer = setTimeout(() => {
-      if (isVoicePressed) {
-        startVoiceRecording();
-        voiceBtn.style.background = '#00ffff';
-        voiceBtn.style.color = '#0a0a0f';
-      }
-    }, 100);
+    voicePressTimer = setTimeout(startVoiceRecording, 100);
   });
-  
   voiceBtn.addEventListener('mouseup', () => {
-    if (voicePressTimer) clearTimeout(voicePressTimer);
+    clearTimeout(voicePressTimer);
     stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
   });
-  
   voiceBtn.addEventListener('mouseleave', () => {
-    if (voicePressTimer) clearTimeout(voicePressTimer);
+    clearTimeout(voicePressTimer);
     stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
   });
   
-  voiceBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    isVoicePressed = true;
-    voicePressTimer = setTimeout(() => {
-      if (isVoicePressed) {
-        startVoiceRecording();
-        voiceBtn.style.background = '#00ffff';
-        voiceBtn.style.color = '#0a0a0f';
-      }
-    }, 100);
-  });
-  
-  voiceBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  // File attachment
   attachBtn.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = (ev) => {
       const base64 = ev.target.result.split(',')[1];
       pendingFile = { base64, mime: file.type, name: file.name };
-      
-      const isImage = file.type.startsWith('image/');
-      filePreviewArea.innerHTML = `<div class="file-preview">
-        ${isImage ? `<img src="data:${file.type};base64,${base64}" alt="preview">` : `<i class="fas fa-file-alt" style="color: #00ffff;"></i>`}
-        <span style="flex:1;">${escapeHtml(file.name)}</span>
-        <button class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
-      </div>`;
-      
-      document.getElementById('removeFileBtn')?.addEventListener('click', () => {
-        pendingFile = null;
-        filePreviewArea.innerHTML = '';
-        fileInput.value = '';
-      });
+      filePreviewArea.innerHTML = `<div class="file-preview">📎 ${escapeHtml(file.name)} <button onclick="this.parentElement.remove(); pendingFile=null">✖</button></div>`;
     };
     reader.readAsDataURL(file);
   });
   
-  // Image generation
   generateImageBtn.addEventListener('click', async () => {
     const prompt = userInput.value.trim();
-    if (prompt) {
-      if (!currentChatId) await createNewChat();
-      await saveMessage('user', `🎨 Generate image: ${prompt}`);
-      displayUserMessage(`🎨 Generate image: ${prompt}`);
-      
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Date.now()}&nologo=true`;
-      
-      const imgMsgDiv = document.createElement('div');
-      imgMsgDiv.className = 'message bot';
-      imgMsgDiv.innerHTML = `
-        <div class="avatar"><i class="fas fa-robot"></i></div>
-        <div class="bubble">
-          <div class="message-text">✨ Here's your creation:</div>
-          <br><img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')">
-          <div class="message-actions"><button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button></div>
-        </div>
-      `;
-      chatContainer.appendChild(imgMsgDiv);
-      imgMsgDiv.querySelector('.speak-msg').onclick = () => speakWithSelectedVoice(`Here's your image of ${prompt}`);
-      
-      await saveMessage('assistant', `Generated image: ${prompt}`, imageUrl);
-      userInput.value = '';
-      scrollToBottom();
-      await loadAllChats();
-    } else {
-      showToast("Describe the image you want to create!", "info");
-    }
+    if (!prompt) { showToast("Describe the image"); return; }
+    if (!currentChatId) createNewChat();
+    saveMessage('user', `🎨 Generate: ${prompt}`);
+    displayUserMessage(`🎨 Generate: ${prompt}`);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Date.now()}`;
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'message bot';
+    imgDiv.innerHTML = `<div class="avatar"><i class="fas fa-robot"></i></div><div class="bubble"><div class="message-text">✨ Here's your image:</div><br><img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')"><div class="message-actions"><button class="action-icon speak-msg">🔊 Speak</button></div></div>`;
+    chatContainer.appendChild(imgDiv);
+    imgDiv.querySelector('.speak-msg').onclick = () => speakText(`Here's your image of ${prompt}`);
+    saveMessage('assistant', `Generated image: ${prompt}`, imageUrl);
+    userInput.value = '';
+    scrollToBottom();
   });
   
-  sendBtn.addEventListener('click', () => sendMessage());
-  userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
+  sendBtn.addEventListener('click', sendMessage);
+  userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
   
-  // Initialize app
+  // INITIALIZE
   window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (splashScreen.style.display !== 'none') {
-        splashScreen.style.opacity = '0';
-        setTimeout(() => {
-          splashScreen.style.display = 'none';
-          appDiv.style.opacity = '1';
-        }, 500);
-      }
-    }, 5000);
+    loadData();
+    if (allChats.length === 0) createNewChat();
+    else if (currentChatId) loadChat(currentChatId);
+    else if (allChats.length > 0) loadChat(allChats[0].id);
     
-    anonymousSignIn();
+    setTimeout(() => {
+      splashScreen.style.opacity = '0';
+      setTimeout(() => {
+        splashScreen.style.display = 'none';
+        appDiv.style.display = 'flex';
+      }, 500);
+    }, 1500);
   });
-  
-  // Initialize speech synthesis voices
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = () => {
-      console.log("Voices loaded");
-    };
-  }
   
   hljs.highlightAll();
-  console.log("✅ Vortex AI Fully Loaded | Firebase Realtime DB | Sidebar on Left | 6 Unique Voices | Cross-Chat Memory");
+  console.log("✅ Vortex AI Ready | No auto-voice | Local storage");
 </script>
 </body>
 </html>
