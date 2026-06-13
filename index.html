@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Vortex AI | Complete Intelligence Platform</title>
+  <title>Vortex AI | Create Account</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  
   <style>
-    /* ========== ALL YOUR EXISTING STYLES REMAIN THE SAME ========== */
     * {
       margin: 0;
       padding: 0;
@@ -20,11 +23,16 @@
     body {
       font-family: 'Inter', sans-serif;
       background: #0a0a0f;
-      height: 100dvh;
-      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
+      overflow-x: hidden;
+      padding: 1rem;
     }
 
+    /* Animated Background */
     body::before {
       content: '';
       position: fixed;
@@ -32,6 +40,8 @@
       height: 100%;
       background: radial-gradient(ellipse at 30% 40%, #1a1a2e, #0a0a0f);
       z-index: -2;
+      top: 0;
+      left: 0;
     }
 
     .orb {
@@ -49,1002 +59,494 @@
     .orb2 { width: 50vw; height: 50vw; background: #8b5cf6; bottom: -30%; right: -20%; animation-duration: 35s; }
     .orb3 { width: 40vw; height: 40vw; background: #06b6d4; top: 40%; left: 50%; animation-duration: 20s; }
 
-    .splash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #0a0a0f;
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 1s ease;
-    }
-    .splash-content {
-      text-align: center;
-      animation: glow 2s infinite alternate;
-      padding: 1rem;
-    }
-    @keyframes glow {
-      0% { transform: translateY(0px); text-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
-      100% { transform: translateY(-15px); text-shadow: 0 0 40px #00ffff; }
-    }
-    .splash-logo { font-size: 4.5rem; background: linear-gradient(135deg, #fff, #00ffff, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .splash-text { font-size: 1.1rem; color: #94a3b8; letter-spacing: 2px; }
-    .splash-loader { width: 200px; height: 2px; background: rgba(0, 212, 255, 0.2); border-radius: 10px; margin: 1.5rem auto 0; overflow: hidden; }
-    .splash-loader-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #3b82f6); animation: loadProgress 1.8s ease forwards; }
-    @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
-
-    .app {
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      transition: opacity 0.8s ease;
-    }
-
-    .header {
-      padding: 0.8rem 1.2rem;
-      background: rgba(10, 20, 30, 0.6);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0, 212, 255, 0.15);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #00ffff, #3b82f6);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-    }
-    .logo-icon i { font-size: 1.3rem; color: white; }
-    .logo h1 { font-size: 1.3rem; background: linear-gradient(135deg, #fff, #00ffff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .status-badge {
-      background: rgba(0, 255, 255, 0.12);
-      padding: 0.3rem 0.8rem;
-      border-radius: 2rem;
-      font-size: 0.65rem;
-      color: #00ffff;
-      border: 1px solid rgba(0, 255, 255, 0.25);
-    }
-
-    .chat-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-    .chat-container::-webkit-scrollbar { width: 3px; }
-    .chat-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-    .chat-container::-webkit-scrollbar-thumb { background: #00ffff; border-radius: 10px; }
-
-    .message {
-      display: flex;
-      gap: 10px;
-      animation: messageIn 0.3s ease;
-      max-width: 88%;
-    }
-    @keyframes messageIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .message.user { align-self: flex-end; flex-direction: row-reverse; }
-    .message.bot { align-self: flex-start; width: 100%; max-width: 92%; }
-
-    .avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(0, 212, 255, 0.3);
-      flex-shrink: 0;
-    }
-    .user .avatar { background: linear-gradient(135deg, #00d4ff, #3b82f6); }
-    .avatar i { font-size: 0.9rem; }
-
-    .bubble {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border-radius: 1.2rem;
-      padding: 0.7rem 1rem;
-      border: 1px solid rgba(0, 212, 255, 0.15);
-      color: #e2e8f0;
-      line-height: 1.5;
-      font-size: 0.85rem;
-      width: 100%;
-      position: relative;
-    }
-    .user .bubble {
-      background: linear-gradient(135deg, rgba(0, 212, 255, 0.85), rgba(59, 130, 246, 0.75));
-      border: none;
-    }
-
-    .edit-message-btn {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: rgba(0, 212, 255, 0.3);
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      font-size: 0.7rem;
-      color: #00ffff;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s;
-      backdrop-filter: blur(4px);
-    }
-    .message.user:hover .edit-message-btn,
-    .message.user:focus-within .edit-message-btn {
-      opacity: 1;
-    }
-    @media (max-width: 768px) {
-      .edit-message-btn { opacity: 0.6; }
-    }
-
-    .typing-controls {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .typing-controls button {
-      background: rgba(0, 212, 255, 0.2);
-      border: none;
-      border-radius: 16px;
-      padding: 3px 12px;
-      font-size: 0.65rem;
-      color: #00ffff;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .typing-controls button:hover {
-      background: rgba(0, 212, 255, 0.4);
-    }
-
-    .code-block {
-      position: relative;
-      background: #0d1117;
-      border-radius: 10px;
-      margin: 8px 0;
-      overflow-x: auto;
-      border: 1px solid #30363d;
-    }
-    .code-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 10px;
-      background: #161b22;
-      font-size: 0.7rem;
-      color: #8b949e;
-    }
-    .copy-code-btn {
-      background: none;
-      border: none;
-      color: #58a6ff;
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 6px;
-    }
-    .code-block pre { margin: 0; padding: 10px; font-size: 0.75rem; background: #0d1117; overflow-x: auto; }
-
-    .message-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-      padding-top: 6px;
-      border-top: 1px solid rgba(0, 212, 255, 0.15);
-      flex-wrap: wrap;
-    }
-    .action-icon {
-      background: none;
-      border: none;
-      color: #64748b;
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 4px 8px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-    .action-icon:hover { background: rgba(0, 255, 255, 0.15); color: #00ffff; }
-
-    .typing-indicator {
-      display: flex;
-      gap: 5px;
-      padding: 6px 0;
-    }
-    .typing-indicator span {
-      width: 7px;
-      height: 7px;
-      background: #00ffff;
-      border-radius: 50%;
-      animation: typingBounce 1.3s infinite;
-    }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-      30% { transform: translateY(-8px); opacity: 1; }
-    }
-
-    .message-image, .generated-img {
-      max-width: 180px;
-      border-radius: 10px;
-      margin-top: 6px;
-      cursor: pointer;
-      border: 1px solid rgba(0, 212, 255, 0.4);
-    }
-
-    .input-wrapper {
-      padding: 0.8rem 1rem;
-      background: rgba(10, 20, 30, 0.8);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(0, 212, 255, 0.15);
-    }
-    .input-container { max-width: 100%; margin: 0 auto; }
-    .input-box {
-      background: rgba(20, 30, 45, 0.9);
+    /* Glass Card */
+    .glass-card {
+      background: rgba(15, 25, 45, 0.6);
+      backdrop-filter: blur(15px);
       border-radius: 2rem;
       border: 1px solid rgba(0, 212, 255, 0.25);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      animation: fadeInUp 0.6s ease;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Logo */
+    .logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .logo-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, #00ffff, #3b82f6);
+      border-radius: 1.5rem;
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 0.3rem 0.3rem 0.3rem 1rem;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+      animation: pulse 2s infinite;
     }
-    .input-box:focus-within { border-color: #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.15); }
-    #userInput {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 0.85rem;
-      padding: 0.7rem 0;
-      resize: none;
-      font-family: inherit;
-      outline: none;
-      max-height: 80px;
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
     }
-    .action-btn {
-      background: rgba(0, 212, 255, 0.1);
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+    .logo-icon i { font-size: 2.2rem; color: white; }
+    .logo h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #fff, #00ffff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .logo p {
       color: #94a3b8;
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+
+    /* Form Group */
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrapper i {
+      position: absolute;
+      left: 1rem;
+      color: #64748b;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .input-wrapper input {
+      width: 100%;
+      background: rgba(20, 30, 45, 0.8);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      border-radius: 1rem;
+      padding: 0.9rem 1rem 0.9rem 2.8rem;
+      color: white;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s;
+      outline: none;
+    }
+    .input-wrapper input:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+      background: rgba(20, 30, 45, 0.95);
+    }
+    .input-wrapper input::placeholder {
+      color: #475569;
+    }
+
+    /* Name Row (First + Last) */
+    .name-row {
+      display: flex;
+      gap: 1rem;
+    }
+    .name-row .form-group {
+      flex: 1;
+    }
+
+    /* Button */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #00ffff, #3b82f6);
+      border: none;
+      border-radius: 1rem;
+      padding: 0.9rem;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 255, 255, 0.3);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Google Button */
+    .btn-google {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 1rem;
+      padding: 0.9rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-google:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(0, 212, 255, 0.5);
+    }
+    .btn-google i {
+      font-size: 1.1rem;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 1.5rem 0;
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    .divider span {
+      margin: 0 1rem;
+    }
+
+    /* Login Link */
+    .login-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+    .login-link a {
+      color: #00ffff;
+      text-decoration: none;
+      font-weight: 600;
       transition: all 0.2s;
     }
-    .action-btn:hover { background: #00ffff; color: #0a0a0f; transform: scale(1.05); }
-    .send-btn { background: linear-gradient(135deg, #00ffff, #3b82f6); color: white; }
-
-    .file-preview {
-      margin-top: 8px;
-      background: rgba(0, 212, 255, 0.08);
-      border-radius: 0.8rem;
-      padding: 6px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      animation: slideUp 0.2s ease;
+    .login-link a:hover {
+      text-shadow: 0 0 8px #00ffff;
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(10px); }
+
+    /* Error/Success Messages */
+    .message {
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .file-preview img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
-    .remove-file { background: none; border: none; color: #ef4444; cursor: pointer; }
-
-    .voice-overlay {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(20px);
-      padding: 12px 20px;
-      border-radius: 50px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      z-index: 1000;
-      border: 1px solid #00ffff;
-      animation: fadeUp 0.2s ease;
+    .message.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-    .wave-container { display: flex; gap: 4px; height: 30px; align-items: center; }
-    .wave {
-      width: 3px;
-      background: #00ffff;
-      border-radius: 2px;
-      animation: waveAnim 0.6s infinite ease alternate;
-    }
-    @keyframes waveAnim {
-      0% { transform: scaleY(0.5); opacity: 0.5; height: 10px; }
-      100% { transform: scaleY(1.2); opacity: 1; height: 25px; }
+    .message.success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
     }
 
-    .footer-note {
-      position: fixed;
-      bottom: 8px;
-      right: 12px;
-      font-size: 0.55rem;
-      color: #475569;
-      background: rgba(0,0,0,0.4);
-      padding: 2px 8px;
-      border-radius: 16px;
+    /* Loading state */
+    .btn-primary:disabled, .btn-google:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
 
-    @media (max-width: 480px) {
-      .chat-container { padding: 0.7rem; }
-      .bubble { font-size: 0.8rem; padding: 0.6rem 0.9rem; }
-      .action-btn { width: 34px; height: 34px; }
-      .message { max-width: 92%; }
-      .message.bot { max-width: 95%; }
-      .avatar { width: 30px; height: 30px; }
+    @media (max-width: 500px) {
+      .glass-card {
+        padding: 1.8rem;
+      }
+      .name-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .logo-icon {
+        width: 55px;
+        height: 55px;
+      }
+      .logo-icon i {
+        font-size: 1.8rem;
+      }
+      .logo h1 {
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
 
-<div class="splash" id="splashScreen">
-  <div class="splash-content">
-    <div class="splash-logo"><i class="fas fa-vortex"></i></div>
-    <div class="splash-text">VORTEX AI</div>
-    <div class="splash-loader"><div class="splash-loader-bar"></div></div>
-    <div style="margin-top: 12px; font-size: 0.7rem; color: #4a5568;">Initializing Neural Core...</div>
-  </div>
-</div>
-
-<div class="app" id="app">
-  <div class="header">
-    <div class="logo">
-      <div class="logo-icon"><i class="fas fa-robot"></i></div>
-      <h1>Vortex AI</h1>
+<div class="glass-card">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fas fa-vortex"></i>
     </div>
-    <div class="status-badge" id="statusBadge"><i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> Connecting</div>
+    <h1>Create Account</h1>
+    <p>Join the future of intelligence</p>
   </div>
 
-  <div class="chat-container" id="chatContainer">
-    <div class="message bot" id="greetingMessage">
-      <div class="avatar"><i class="fas fa-brain"></i></div>
-      <div class="bubble">
-        <div class="message-text">
-          👋 Hey! I'm Vortex — your intelligent assistant.<br><br>
-          ✨ <strong>Features:</strong><br>
-          • 📎 Upload images or PDFs for analysis<br>
-          • 🎨 Click the image button to generate AI art<br>
-          • 🎤 Press and hold the mic to speak<br>
-          • ✏️ Hover over your message → edit ✏️<br>
-          • ⏸️ Stop/Continue typing while AI responds<br>
-          • 🔄 Regenerate responses without duplication<br>
-          • 🗣️ Female voice output on all responses<br><br>
-          Ask me anything!
+  <div id="message" class="message"></div>
+
+  <form id="registerForm">
+    <div class="name-row">
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="fas fa-user"></i>
+          <input type="text" id="firstName" placeholder="First Name" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="fas fa-user"></i>
+          <input type="text" id="lastName" placeholder="Last Name" required>
         </div>
       </div>
     </div>
+
+    <div class="form-group">
+      <div class="input-wrapper">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" placeholder="Email Address" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="input-wrapper">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" placeholder="Password (min 6 characters)" required>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary" id="signUpBtn">
+      <i class="fas fa-arrow-right"></i> Sign Up
+    </button>
+  </form>
+
+  <div class="divider">
+    <span>OR</span>
   </div>
 
-  <div class="input-wrapper">
-    <div class="input-container">
-      <div class="input-box">
-        <textarea id="userInput" rows="1" placeholder="Ask me anything..."></textarea>
-        <div class="action-buttons">
-          <button class="action-btn" id="attachBtn" title="Upload Image/Document"><i class="fas fa-paperclip"></i></button>
-          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display: none;">
-          <button class="action-btn" id="generateImageBtn" title="Generate AI Image"><i class="fas fa-image"></i></button>
-          <button class="action-btn" id="voiceBtn" title="Press and hold to speak"><i class="fas fa-microphone"></i></button>
-          <button class="action-btn send-btn" id="sendBtn"><i class="fas fa-arrow-up"></i></button>
-        </div>
-      </div>
-      <div id="filePreviewArea"></div>
-    </div>
+  <button class="btn-google" id="googleSignUpBtn">
+    <i class="fab fa-google"></i> Continue with Google
+  </button>
+
+  <div class="login-link">
+    Already have an account? <a href="login.html">Login</a>
   </div>
-  <div class="footer-note">Vortex AI • Press & Hold Mic to Speak</div>
 </div>
 
 <script>
-  // ==================== SECURE: Calls OUR OWN API (not OpenRouter directly) ====================
-  // API key is stored in Vercel environment variables, NOT in this file!
-  
-  let pendingFile = null;
-  let typingDiv = null;
-  let firstMessageSent = false;
-  let greetingMsg = document.getElementById('greetingMessage');
-  
-  // Streaming variables
-  let isResponding = false;
-  let currentStreamMsgDiv = null;
-  let streamCancel = false;
-  let streamIndex = 0;
-  let fullResponseText = "";
-  let currentRegenerateCallback = null;
-  let streamInterval = null;
-  
-  // DOM elements
-  const chatContainer = document.getElementById('chatContainer');
-  const userInput = document.getElementById('userInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const attachBtn = document.getElementById('attachBtn');
-  const fileInput = document.getElementById('fileInput');
-  const voiceBtn = document.getElementById('voiceBtn');
-  const generateImageBtn = document.getElementById('generateImageBtn');
-  const filePreviewArea = document.getElementById('filePreviewArea');
-  const splashScreen = document.getElementById('splashScreen');
-  const appDiv = document.getElementById('app');
-  const statusBadge = document.getElementById('statusBadge');
-  
-  // Voice variables
-  let voicePressTimer = null;
-  let isVoicePressed = false;
-  let activeRecognition = null;
-  let voiceOverlay = null;
-  let femaleVoice = null;
-  
-  // Initialize female voice
-  function initFemaleVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    femaleVoice = voices.find(v => 
-      v.name.includes('Google UK English Female') || 
-      v.name.includes('Samantha') || 
-      v.name.includes('Microsoft Sabina') ||
-      v.name.includes('Female') ||
-      (v.lang === 'en-US' && v.name.includes('Google'))
-    );
-    if (!femaleVoice && voices.length > 0) {
-      femaleVoice = voices.find(v => v.lang.includes('en')) || voices[0];
-    }
-  }
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = initFemaleVoice;
-    initFemaleVoice();
-  }
-  
-  userInput.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
-  });
-  
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')).replace(/\n/g, '<br>');
-  }
-  
-  function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-  
-  function cleanResponse(text) {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/^#+\s*/gm, '');
-  }
-  
-  function formatCodeBlocks(text) {
-    const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-    return text.replace(codeBlockRegex, (match, lang, code) => {
-      const escapedCode = escapeHtml(code.trim());
-      return `<div class="code-block">
-        <div class="code-header">
-          <span>${lang || 'code'}</span>
-          <button class="copy-code-btn" onclick="window.copyCodeBlock(this, \`${escapedCode.replace(/`/g, '\\`')}\`)"><i class="fas fa-copy"></i> Copy</button>
-        </div>
-        <pre><code class="language-${lang || 'plaintext'}">${escapedCode}</code></pre>
-      </div>`;
-    });
-  }
-  
-  window.copyCodeBlock = function(btn, code) {
-    navigator.clipboard.writeText(code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
-    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+  // ==================== FIREBASE CONFIGURATION ====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBD21w845BJM_RMz90s-3Hxj80nrhMxly4",
+    authDomain: "vortex-ai-56177.firebaseapp.com",
+    projectId: "vortex-ai-56177",
+    storageBucket: "vortex-ai-56177.firebasestorage.app",
+    messagingSenderId: "746045419077",
+    appId: "1:746045419077:web:250d5360ee6f493d77bd2c",
+    measurementId: "G-7E814PXDZZ",
+    databaseURL: "https://vortex-ai-56177-default-rtdb.firebaseio.com/"
   };
-  
-  function addUserMessage(text, imageUrl = null, existingMsgDiv = null) {
-    if (!firstMessageSent && greetingMsg) {
-      greetingMsg.style.display = 'none';
-      firstMessageSent = true;
-    }
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const database = firebase.database();
+
+  // DOM Elements
+  const registerForm = document.getElementById('registerForm');
+  const signUpBtn = document.getElementById('signUpBtn');
+  const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+  const messageDiv = document.getElementById('message');
+
+  // Helper function to show messages
+  function showMessage(text, isError = true) {
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${isError ? 'error' : 'success'}`;
+    messageDiv.style.display = 'block';
     
-    if (existingMsgDiv) {
-      const textDiv = existingMsgDiv.querySelector('.message-text');
-      if (textDiv) textDiv.innerHTML = escapeHtml(text);
-      if (imageUrl) {
-        let img = existingMsgDiv.querySelector('.message-image');
-        if (img) img.src = imageUrl;
-        else existingMsgDiv.querySelector('.bubble').insertAdjacentHTML('beforeend', `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">`);
-      }
-      return existingMsgDiv;
-    }
-    
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message user';
-    let contentHtml = `<div class="avatar"><i class="fas fa-user-astronaut"></i></div>
-      <div class="bubble">
-        <div class="message-text">${escapeHtml(text)}</div>
-        <button class="edit-message-btn" onclick="editUserMessage(this)" title="Edit message"><i class="fas fa-pencil-alt"></i></button>`;
-    if (imageUrl) contentHtml += `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">`;
-    contentHtml += `</div>`;
-    msgDiv.innerHTML = contentHtml;
-    chatContainer.appendChild(msgDiv);
-    scrollToBottom();
-    return msgDiv;
+    setTimeout(() => {
+      messageDiv.style.display = 'none';
+    }, 5000);
   }
-  
-  window.editUserMessage = function(btn) {
-    const bubble = btn.closest('.bubble');
-    const textDiv = bubble.querySelector('.message-text');
-    const oldText = textDiv.innerText;
-    userInput.value = oldText;
-    userInput.focus();
-    const msgDiv = btn.closest('.message');
-    if (msgDiv) msgDiv.remove();
-  };
-  
-  async function addBotMessageWithStreaming(onRegenerate, startTime) {
-    return new Promise((resolve) => {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message bot';
-      const uniqueId = Date.now();
-      msgDiv.innerHTML = `<div class="avatar"><i class="fas fa-robot"></i></div>
-        <div class="bubble">
-          <div class="message-text" id="streamText-${uniqueId}"></div>
-          <div class="typing-controls" id="typingControls-${uniqueId}" style="display: none;">
-            <button class="stop-typing-btn"><i class="fas fa-stop"></i> Stop</button>
-            <button class="continue-typing-btn" style="display: none;"><i class="fas fa-play"></i> Continue</button>
-          </div>
-          <div class="message-actions" style="display: none;">
-            <button class="action-icon copy-msg"><i class="fas fa-copy"></i> Copy</button>
-            <button class="action-icon regenerate-msg"><i class="fas fa-rotate-right"></i> Regenerate</button>
-            <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
-          </div>
-        </div>`;
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-      
-      const textContainer = msgDiv.querySelector(`#streamText-${uniqueId}`);
-      const typingControls = msgDiv.querySelector(`#typingControls-${uniqueId}`);
-      const actionsDiv = msgDiv.querySelector('.message-actions');
-      const stopBtn = typingControls.querySelector('.stop-typing-btn');
-      const continueBtn = typingControls.querySelector('.continue-typing-btn');
-      
-      let isPaused = false;
-      let currentPosition = 0;
-      const cleanedText = cleanResponse(fullResponseText);
-      
-      typingControls.style.display = 'flex';
-      
-      function typeNextChar() {
-        if (isPaused) return;
-        if (currentPosition < cleanedText.length) {
-          const currentHtml = formatCodeBlocks(cleanedText.substring(0, currentPosition + 1));
-          textContainer.innerHTML = currentHtml;
-          hljs.highlightAll();
-          currentPosition++;
-          scrollToBottom();
-          streamInterval = setTimeout(typeNextChar, 12);
-        } else {
-          clearTimeout(streamInterval);
-          typingControls.style.display = 'none';
-          actionsDiv.style.display = 'flex';
-          
-          actionsDiv.querySelector('.copy-msg').onclick = () => {
-            navigator.clipboard.writeText(cleanedText);
-            const btn = actionsDiv.querySelector('.copy-msg');
-            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
-          };
-          
-          actionsDiv.querySelector('.regenerate-msg').onclick = () => {
-            msgDiv.remove();
-            if (onRegenerate) onRegenerate();
-          };
-          
-          actionsDiv.querySelector('.speak-msg').onclick = () => {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(cleanedText);
-            if (femaleVoice) utterance.voice = femaleVoice;
-            window.speechSynthesis.speak(utterance);
-          };
-          
-          isResponding = false;
-          currentStreamMsgDiv = null;
-          resolve(msgDiv);
-        }
-      }
-      
-      stopBtn.onclick = () => {
-        isPaused = true;
-        clearTimeout(streamInterval);
-        stopBtn.style.display = 'none';
-        continueBtn.style.display = 'inline-flex';
-      };
-      
-      continueBtn.onclick = () => {
-        isPaused = false;
-        stopBtn.style.display = 'inline-flex';
-        continueBtn.style.display = 'none';
-        typeNextChar();
-      };
-      
-      typeNextChar();
-    });
-  }
-  
-  function showTypingIndicator() {
-    if (typingDiv) typingDiv.remove();
-    typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot';
-    typingDiv.innerHTML = `<div class="avatar"><i class="fas fa-brain"></i></div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
-    chatContainer.appendChild(typingDiv);
-    scrollToBottom();
-  }
-  
-  function hideTypingIndicator() {
-    if (typingDiv) { typingDiv.remove(); typingDiv = null; }
-  }
-  
-  // ========== SECURE API CALL - Calls our own backend, not OpenRouter directly ==========
-  async function callVortexAPI(prompt, fileBase64 = null, mimeType = 'image/jpeg') {
+
+  // Helper function to save user data to Realtime Database
+  async function saveUserToDatabase(userId, firstName, lastName, email) {
     try {
-      statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Thinking';
-      
-      const requestBody = {
-        message: prompt,
-        image: fileBase64 ? { data: fileBase64, mimeType: mimeType } : null
-      };
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000);
-      
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
+      await database.ref(`users/${userId}`).set({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+        subscriptionTier: 'free'
       });
+      return true;
+    } catch (error) {
+      console.error("Database save error:", error);
+      return false;
+    }
+  }
+
+  // Helper function to redirect to chat page
+  function redirectToChat() {
+    window.location.href = 'vortexai.html';
+  }
+
+  // Email/Password Sign Up
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Validation
+    if (!firstName || !lastName || !email || !password) {
+      showMessage('Please fill in all fields', true);
+      return;
+    }
+    
+    if (password.length < 6) {
+      showMessage('Password must be at least 6 characters', true);
+      return;
+    }
+    
+    // Disable button and show loading
+    signUpBtn.disabled = true;
+    signUpBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Creating Account...';
+    
+    try {
+      // Create user with email/password
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
       
-      clearTimeout(timeoutId);
+      // Save additional user data to Realtime Database
+      const saved = await saveUserToDatabase(user.uid, firstName, lastName, email);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+      if (saved) {
+        showMessage('Account created successfully! Redirecting...', false);
+        setTimeout(() => {
+          redirectToChat();
+        }, 1500);
+      } else {
+        showMessage('Account created but profile data could not be saved. Please contact support.', true);
       }
-      
-      const data = await response.json();
-      
-      if (data.error) {
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> Error';
-        return data.error;
-      }
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> Online';
-        return data.choices[0].message.content;
-      }
-      
-      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> Limited';
-      return "Unexpected response from server. Please try again.";
       
     } catch (error) {
-      console.error("API Error:", error);
-      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> Offline';
+      console.error("Sign up error:", error);
       
-      if (error.name === 'AbortError') {
-        return "Request timeout. The AI is taking too long. Please try again.";
+      let errorMessage = 'Sign up failed. ';
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'Email already in use. Please login instead.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email address.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Password is too weak. Use at least 6 characters.';
+          break;
+        default:
+          errorMessage += error.message;
+      }
+      showMessage(errorMessage, true);
+    } finally {
+      signUpBtn.disabled = false;
+      signUpBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Sign Up';
+    }
+  });
+
+  // Google Sign Up
+  googleSignUpBtn.addEventListener('click', async () => {
+    googleSignUpBtn.disabled = true;
+    googleSignUpBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Connecting to Google...';
+    
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    
+    try {
+      const result = await auth.signInWithPopup(provider);
+      const user = result.user;
+      const firstName = user.displayName?.split(' ')[0] || '';
+      const lastName = user.displayName?.split(' ').slice(1).join(' ') || '';
+      const email = user.email;
+      
+      // Check if user already exists in database
+      const userSnapshot = await database.ref(`users/${user.uid}`).once('value');
+      
+      if (!userSnapshot.exists()) {
+        // New user - save to database
+        await saveUserToDatabase(user.uid, firstName, lastName, email);
+        showMessage('Account created successfully! Redirecting...', false);
+      } else {
+        showMessage('Welcome back! Redirecting...', false);
       }
       
-      return `Network error: ${error.message}. Please check your connection.`;
-    }
-  }
-  
-  async function generateImageFromPrompt(promptText) {
-    const cleanPrompt = promptText.trim();
-    if (!cleanPrompt) {
-      fullResponseText = "What kind of image would you like me to create? Describe it first!";
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => generateImageFromPrompt(promptText);
-      await addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-      return;
-    }
-    
-    addUserMessage(`🎨 Creating image: "${cleanPrompt}"`);
-    showTypingIndicator();
-    
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=1024&seed=${Date.now()}&nologo=true`;
-    const img = new Image();
-    
-    img.onload = () => {
-      hideTypingIndicator();
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message bot';
-      msgDiv.innerHTML = `<div class="avatar"><i class="fas fa-robot"></i></div>
-        <div class="bubble">
-          <div class="message-text">✨ Here's your creation:</div>
-          <br><img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')">
-          <div class="message-actions" style="display: flex; margin-top: 8px;">
-            <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
-          </div>
-        </div>`;
-      chatContainer.appendChild(msgDiv);
-      scrollToBottom();
-      
-      const speakBtn = msgDiv.querySelector('.speak-msg');
-      if (speakBtn) {
-        speakBtn.onclick = () => {
-          const utterance = new SpeechSynthesisUtterance(`Here's your image of ${cleanPrompt}`);
-          if (femaleVoice) utterance.voice = femaleVoice;
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.speak(utterance);
-        };
-      }
-    };
-    
-    img.onerror = () => {
-      hideTypingIndicator();
-      fullResponseText = "Image generation failed. Try a different description.";
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => generateImageFromPrompt(promptText);
-      addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-    };
-    
-    img.src = imageUrl;
-  }
-  
-  async function sendMessage(userText, retryFile = null) {
-    if (isResponding) {
-      if (currentStreamMsgDiv && streamInterval) {
-        clearTimeout(streamInterval);
-        isResponding = false;
-      }
-      return;
-    }
-    
-    const text = userText || userInput.value.trim();
-    if (!text && !pendingFile && !retryFile) return;
-    
-    if (!firstMessageSent && greetingMsg) greetingMsg.style.display = 'none';
-    
-    const fileToSend = retryFile || pendingFile;
-    const userImageUrl = fileToSend ? `data:${fileToSend.mime};base64,${fileToSend.base64}` : null;
-    
-    addUserMessage(text || "Analyzing attachment", userImageUrl);
-    userInput.value = '';
-    if (!retryFile) {
-      pendingFile = null;
-      filePreviewArea.innerHTML = '';
-    }
-    
-    showTypingIndicator();
-    const startTime = Date.now();
-    
-    const response = await callVortexAPI(text || "Describe this attachment", fileToSend?.base64, fileToSend?.mime);
-    
-    hideTypingIndicator();
-    fullResponseText = cleanResponse(response);
-    streamIndex = 0;
-    isResponding = true;
-    currentRegenerateCallback = () => sendMessage(text, fileToSend);
-    await addBotMessageWithStreaming(currentRegenerateCallback, startTime);
-  }
-  
-  attachBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const base64 = ev.target.result.split(',')[1];
-      pendingFile = { base64, mime: file.type, name: file.name };
-      
-      const isImage = file.type.startsWith('image/');
-      filePreviewArea.innerHTML = `<div class="file-preview">
-        ${isImage ? `<img src="data:${file.type};base64,${base64}" alt="preview">` : `<i class="fas fa-file-alt" style="color: #00ffff;"></i>`}
-        <span style="flex:1;">${escapeHtml(file.name)}</span>
-        <button class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
-      </div>`;
-      
-      document.getElementById('removeFileBtn')?.addEventListener('click', () => {
-        pendingFile = null;
-        filePreviewArea.innerHTML = '';
-        fileInput.value = '';
-      });
-      
-      fullResponseText = `📎 File ready: "${file.name}". Ask me about it or just send.`;
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => {};
-      addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-    };
-    reader.readAsDataURL(file);
-  });
-  
-  generateImageBtn.addEventListener('click', () => {
-    const prompt = userInput.value.trim();
-    if (prompt) {
-      generateImageFromPrompt(prompt);
-      userInput.value = '';
-    } else {
-      fullResponseText = "Describe the image you want me to create! Example: 'a futuristic cyberpunk city'";
-      streamIndex = 0;
-      isResponding = true;
-      currentRegenerateCallback = () => generateImageFromPrompt("");
-      addBotMessageWithStreaming(currentRegenerateCallback, Date.now());
-    }
-  });
-  
-  function createVoiceWaveOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'voice-overlay';
-    overlay.innerHTML = `<div class="wave-container"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div></div><div style="color:white; font-size:0.7rem;">🎤 Listening... Release to send</div>`;
-    document.body.appendChild(overlay);
-    return overlay;
-  }
-  
-  function startVoiceRecording() {
-    if (!('webkitSpeechRecognition' in window)) {
-      fullResponseText = "Voice recognition requires Chrome or Edge browser.";
-      streamIndex = 0;
-      isResponding = true;
-      addBotMessageWithStreaming(() => {}, Date.now());
-      return;
-    }
-    
-    const SpeechRecognition = window.webkitSpeechRecognition;
-    activeRecognition = new SpeechRecognition();
-    activeRecognition.lang = 'en-US';
-    activeRecognition.interimResults = true;
-    activeRecognition.continuous = true;
-    
-    voiceOverlay = createVoiceWaveOverlay();
-    let finalTranscript = '';
-    
-    activeRecognition.onresult = (event) => {
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        }
-      }
-      if (voiceOverlay && finalTranscript) {
-        const textDiv = voiceOverlay.querySelector('div:last-child');
-        if (textDiv) textDiv.innerHTML = `📝 "${finalTranscript.substring(0, 35)}${finalTranscript.length > 35 ? '...' : ''}"`;
-      }
-    };
-    
-    activeRecognition.onend = () => {
-      if (voiceOverlay) voiceOverlay.remove();
-      if (finalTranscript.trim()) {
-        userInput.value = finalTranscript;
-        sendMessage(finalTranscript);
-      }
-      activeRecognition = null;
-    };
-    
-    activeRecognition.onerror = () => {
-      if (voiceOverlay) voiceOverlay.remove();
-      activeRecognition = null;
-    };
-    
-    activeRecognition.start();
-  }
-  
-  function stopVoiceRecording() {
-    if (activeRecognition) {
-      activeRecognition.stop();
-      activeRecognition = null;
-    }
-    if (voiceOverlay) voiceOverlay.remove();
-  }
-  
-  voiceBtn.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    isVoicePressed = true;
-    voicePressTimer = setTimeout(() => {
-      if (isVoicePressed) {
-        startVoiceRecording();
-        voiceBtn.style.background = '#00ffff';
-        voiceBtn.style.color = '#0a0a0f';
-      }
-    }, 100);
-  });
-  
-  voiceBtn.addEventListener('mouseup', () => {
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  voiceBtn.addEventListener('mouseleave', () => {
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  voiceBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    isVoicePressed = true;
-    voicePressTimer = setTimeout(() => {
-      if (isVoicePressed) {
-        startVoiceRecording();
-        voiceBtn.style.background = '#00ffff';
-        voiceBtn.style.color = '#0a0a0f';
-      }
-    }, 100);
-  });
-  
-  voiceBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  sendBtn.addEventListener('click', () => sendMessage());
-  userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-  
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      splashScreen.style.opacity = '0';
       setTimeout(() => {
-        splashScreen.style.display = 'none';
-        appDiv.style.opacity = '1';
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> Online';
-      }, 800);
-    }, 2000);
+        redirectToChat();
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      let errorMessage = 'Google sign in failed. ';
+      if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Popup was blocked. Please allow popups for this site.';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        errorMessage = 'Sign in was cancelled. Please try again.';
+      } else {
+        errorMessage += error.message;
+      }
+      showMessage(errorMessage, true);
+    } finally {
+      googleSignUpBtn.disabled = false;
+      googleSignUpBtn.innerHTML = '<i class="fab fa-google"></i> Continue with Google';
+    }
   });
-  
-  hljs.highlightAll();
-  
-  console.log("✅ Vortex AI Ready | API calls routed through /api/chat for security");
+
+  // Check if user is already logged in
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      // User is already logged in, redirect to chat
+      window.location.href = 'vortexai.html';
+    }
+  });
 </script>
 </body>
 </html>
