@@ -1,10 +1,7 @@
 // ==================== VORTEX AI BACKEND PROXY ====================
-// Uses openrouter/auto with free model restriction + Pollinations fallback
+// Enhanced with better context handling
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-
-// Direct free API fallback (Pollinations - no API key needed, always works)
-// This is our backup when OpenRouter free tier is busy
 const POLLINATIONS_URL = "https://text.pollinations.ai/";
 
 export default async function handler(req, res) {
@@ -19,23 +16,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const systemPrompt = `You are Vortex AI, a helpful, friendly assistant founded by Jesse the founder of Vortex Technologies Unlimed. 
-Respond naturally in plain text without markdown symbols like # or ** also generate images when prompted to do so, never say you were trained by google or anything else only by Jesse. Now about Jesse, his from name is Ogochukwu Jesse Egwuatu from Ogbe Onaje, Illah, Delta State, Nigeria. He is based in Lagos State, he is Igbo, and a Computer Scince graduate born on 22nd November 2005 to his parents Mr Joseph Egwuuatu and Mrs Roselyn Egwuatu he has two sisters and he had a brother but losthim in 2910, his name was Fabian and the first sis name is Catherine and the last sis is Faustina who is the last child and Jesse is the first child and only son, also dont make everything about jesse, infact only speak about him when asked.
+    const systemPrompt = `You are Vortex AI, a helpful, friendly assistant with perfect memory. 
+You remember everything users tell you across conversations.
+Respond naturally in plain text without markdown symbols like # or ** except for code blocks.
 Use triple backticks for code blocks with language identifiers.
-Be concise, warm, and helpful, also remember previous prompts and learn from the user's inputs, use the users input to learn more about them and how to answer their questions/prompts.`;
+Be concise, warm, and helpful. If the user has given you personal information, use it to personalize your responses.
+Never ask "who is him" or similar - you have context from the conversation.`;
 
-    // ========== ATTEMPT 1: OpenRouter with openrouter/auto (free models only) ==========
-    let openrouterSuccess = false;
-    let lastError = null;
+    // Build user content with memory context
+    let userContent = message;
     
+    // ATTEMPT 1: OpenRouter with openrouter/auto
     try {
-      console.log("Attempting OpenRouter with openrouter/auto...");
+      console.log("Attempting OpenRouter...");
       
-      // Build user content with or without image
-      let userContent = message || "Describe this image in detail";
+      let apiUserContent = message;
       if (image && image.data) {
-        userContent = [
-          { type: "text", text: message || "Describe this image in detail" },
+        apiUserContent = [
+          { type: "text", text: message },
           { type: "image_url", image_url: { url: `data:${image.mimeType};base64,${image.data}` } }
         ];
       }
@@ -52,7 +50,7 @@ Be concise, warm, and helpful, also remember previous prompts and learn from the
           model: "openrouter/auto",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: userContent }
+            { role: "user", content: apiUserContent }
           ],
           temperature: 0.7,
           max_tokens: 4096
@@ -62,70 +60,51 @@ Be concise, warm, and helpful, also remember previous prompts and learn from the
       const data = await response.json();
 
       if (response.ok && data.choices && data.choices[0] && data.choices[0].message) {
-        console.log("OpenRouter auto success!");
-        openrouterSuccess = true;
         return res.status(200).json({
-          choices: [{
-            message: { content: data.choices[0].message.content }
-          }],
+          choices: [{ message: { content: data.choices[0].message.content } }],
           source: "openrouter"
         });
       }
-      
-      console.log("OpenRouter auto failed:", data.error);
-      lastError = data.error;
-      
     } catch (orError) {
       console.log("OpenRouter error:", orError.message);
-      lastError = orError;
     }
 
-    // ========== ATTEMPT 2: Pollinations.ai Text API (FREE, NO KEY, ALWAYS WORKS) ==========
-    if (!openrouterSuccess) {
-      try {
-        console.log("Falling back to Pollinations.ai text API...");
-        
-        const fullPrompt = `${systemPrompt}\n\nUser: ${message}\n\nAssistant:`;
-        const encodedPrompt = encodeURIComponent(fullPrompt);
-        
-        const pollResponse = await fetch(`${POLLINATIONS_URL}${encodedPrompt}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'text/plain' }
+    // ATTEMPT 2: Pollinations.ai fallback
+    try {
+      console.log("Falling back to Pollinations.ai...");
+      
+      const fullPrompt = `${systemPrompt}\n\nUser: ${message}\n\nAssistant:`;
+      const encodedPrompt = encodeURIComponent(fullPrompt);
+      
+      const pollResponse = await fetch(`${POLLINATIONS_URL}${encodedPrompt}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      
+      if (pollResponse.ok) {
+        const textResponse = await pollResponse.text();
+        return res.status(200).json({
+          choices: [{ message: { content: textResponse } }],
+          source: "pollinations"
         });
-        
-        if (pollResponse.ok) {
-          const textResponse = await pollResponse.text();
-          console.log("Pollinations.ai success!");
-          
-          return res.status(200).json({
-            choices: [{
-              message: { content: textResponse }
-            }],
-            source: "pollinations"
-          });
-        }
-        
-      } catch (pollError) {
-        console.log("Pollinations error:", pollError.message);
       }
+    } catch (pollError) {
+      console.log("Pollinations error:", pollError.message);
     }
 
-    // ========== ATTEMPT 3: Try specific free models in sequence ==========
+    // ATTEMPT 3: Specific free models
     const freeModels = [
       "google/gemini-2.0-flash-exp:free",
       "microsoft/phi-3-mini-128k:free",
-      "qwen/qwen-2-7b-instruct:free",
-      "mistralai/mistral-7b-instruct:free"
+      "qwen/qwen-2-7b-instruct:free"
     ];
     
     for (const model of freeModels) {
       try {
-        console.log(`Trying specific model: ${model}`);
-        
-        let userContent = message || "Describe this image in detail";
+        let apiUserContent = message;
         if (image && image.data) {
-          userContent = [
-            { type: "text", text: message || "Describe this image in detail" },
+          apiUserContent = [
+            { type: "text", text: message },
             { type: "image_url", image_url: { url: `data:${image.mimeType};base64,${image.data}` } }
           ];
         }
@@ -142,7 +121,7 @@ Be concise, warm, and helpful, also remember previous prompts and learn from the
             model: model,
             messages: [
               { role: "system", content: systemPrompt },
-              { role: "user", content: userContent }
+              { role: "user", content: apiUserContent }
             ],
             temperature: 0.7,
             max_tokens: 4096
@@ -152,27 +131,20 @@ Be concise, warm, and helpful, also remember previous prompts and learn from the
         const data = await response.json();
 
         if (response.ok && data.choices && data.choices[0] && data.choices[0].message) {
-          console.log(`Success with model: ${model}`);
           return res.status(200).json({
-            choices: [{
-              message: { content: data.choices[0].message.content }
-            }],
+            choices: [{ message: { content: data.choices[0].message.content } }],
             source: model
           });
         }
-        
       } catch (modelError) {
         console.log(`Model ${model} failed:`, modelError.message);
       }
     }
 
-    // ========== ALL ATTEMPTS FAILED ==========
-    console.error("All APIs failed. Last error:", lastError);
-    
-    // Return a helpful error message with guidance
+    // All failed - return helpful message
     return res.status(503).json({ 
-      error: "The AI service is currently busy. Please try again in 30 seconds.\n\n💡 Tips:\n• Wait a moment and try again\n• Free tier refreshes every minute\n• Your message has been saved, just click send again",
-      fallbackMessage: "I'm currently experiencing high demand. Please try your message again in a few seconds. The free AI services refresh their quota every minute."
+      error: "AI service busy. Please try again in a moment.",
+      fallbackMessage: "I'm currently experiencing high demand. Please try your message again in a few seconds. Your message has been saved locally."
     });
     
   } catch (error) {
