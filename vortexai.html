@@ -1,1910 +1,2053 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Vortex AI | Complete Intelligence Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <!-- Firebase SDKs for Realtime Database -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Vortex AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:opsz,wght@14..32,400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<style>
+/* =========================================================================
+   VORTEX AI — DESIGN TOKENS
+   ========================================================================= */
+:root{
+  --bg:#05060a;
+  --bg-elevated:#0b0e16;
+  --surface: rgba(20,24,38,.62);
+  --surface-solid:#12151f;
+  --border: rgba(124,140,255,.16);
+  --border-strong: rgba(124,140,255,.32);
+  --cyan:#20e3ff;
+  --violet:#8a5cff;
+  --teal:#1ff2c1;
+  --amber:#ffb454;
+  --red:#ff5c72;
+  --text:#eef1f7;
+  --text-dim:#93a0b8;
+  --text-faint:#5c6b85;
+  --radius-lg:20px;
+  --radius-md:14px;
+  --radius-sm:10px;
+  --font-display:'Space Grotesk', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  height:100dvh;
+  overflow:hidden;
+  position:relative;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(138,92,255,.18), transparent 60%),
+    radial-gradient(ellipse 50% 45% at 100% 20%, rgba(32,227,255,.14), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(31,242,193,.08), transparent 60%),
+    var(--bg);
+  z-index:-2;
+}
+.noise{position:fixed;inset:0;z-index:-1;opacity:.035;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0a0a0f;
-      height: 100dvh;
-      overflow: hidden;
-      position: relative;
-    }
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(124,140,255,.25);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(124,140,255,.45);}
 
-    body::before {
-      content: '';
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(ellipse at 30% 40%, #1a1a2e, #0a0a0f);
-      z-index: -2;
-    }
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+}
 
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(100px);
-      z-index: -1;
-      animation: float 25s infinite alternate;
-    }
-    @keyframes float {
-      0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-      100% { transform: translate(5%, 5%) scale(1.3); opacity: 0.15; }
-    }
-    .orb1 { width: 60vw; height: 60vw; background: #3b82f6; top: -20%; left: -20%; }
-    .orb2 { width: 50vw; height: 50vw; background: #8b5cf6; bottom: -30%; right: -20%; animation-duration: 35s; }
-    .orb3 { width: 40vw; height: 40vw; background: #06b6d4; top: 40%; left: 50%; animation-duration: 20s; }
+/* ===== LOGO (signature element) ===== */
+.vortex-mark{ display:inline-flex; align-items:center; justify-content:center; }
+.vortex-mark svg{ display:block; }
+.vortex-spin{ animation:spin 14s linear infinite; transform-origin:50% 50%; }
+.vortex-spin-rev{ animation:spinRev 20s linear infinite; transform-origin:50% 50%; }
+@keyframes spin{ to{ transform:rotate(360deg);} }
+@keyframes spinRev{ to{ transform:rotate(-360deg);} }
 
-    .splash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #0a0a0f;
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.5s ease;
-    }
-    .splash-content {
-      text-align: center;
-      animation: glow 2s infinite alternate;
-      padding: 1rem;
-    }
-    @keyframes glow {
-      0% { transform: translateY(0px); text-shadow: 0 0 15px rgba(0, 212, 255, 0.3); }
-      100% { transform: translateY(-15px); text-shadow: 0 0 40px #00ffff; }
-    }
-    .splash-logo { font-size: 4.5rem; background: linear-gradient(135deg, #fff, #00ffff, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .splash-text { font-size: 1.1rem; color: #94a3b8; letter-spacing: 2px; }
-    .splash-loader { width: 200px; height: 2px; background: rgba(0, 212, 255, 0.2); border-radius: 10px; margin: 1.5rem auto 0; overflow: hidden; }
-    .splash-loader-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #3b82f6); animation: loadProgress 1.5s ease forwards; }
-    @keyframes loadProgress { 0% { width: 0%; } 100% { width: 100%; } }
+/* ===== SPLASH ===== */
+.splash{
+  position:fixed;inset:0;z-index:10000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .6s ease;
+}
+.splash-content{text-align:center;padding:1rem;}
+.splash-logo-wrap{ margin-bottom:1.4rem; filter:drop-shadow(0 0 30px rgba(32,227,255,.35)); }
+.splash-title{
+  font-family:var(--font-display);
+  font-size:2.2rem;font-weight:700;letter-spacing:.5px;
+  background:linear-gradient(120deg,#fff 10%,var(--cyan) 50%,var(--violet) 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:.4rem;
+}
+.splash-sub{font-size:.72rem;color:var(--text-faint);letter-spacing:3px;text-transform:uppercase;font-weight:500;}
+.splash-loader{width:220px;height:2px;background:rgba(32,227,255,.15);border-radius:10px;margin:1.6rem auto 0;overflow:hidden;}
+.splash-loader-bar{width:0%;height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));animation:loadProgress 2.4s ease forwards;}
+@keyframes loadProgress{0%{width:0%;}80%{width:92%;}100%{width:97%;}}
+.splash-status{margin-top:14px;font-size:.68rem;color:var(--text-faint);min-height:1.4em;}
+.splash-retry{margin-top:1rem;background:rgba(32,227,255,.12);border:1px solid var(--border-strong);color:var(--cyan);padding:.5rem 1rem;border-radius:2rem;font-size:.72rem;cursor:pointer;display:none;}
+.splash-retry.show{display:inline-block;}
 
-    .app {
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      position: relative;
-    }
+/* ===== APP SHELL ===== */
+.app{height:100dvh;display:flex;flex-direction:column;opacity:0;transition:opacity .5s ease;position:relative;}
 
-    /* ========== SIDEBAR - ON LEFT ========== */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -100%;
-      width: 320px;
-      height: 100%;
-      background: rgba(10, 20, 30, 0.95);
-      backdrop-filter: blur(30px);
-      border-right: 1px solid rgba(0, 212, 255, 0.2);
-      z-index: 2000;
-      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
-    }
-    .sidebar.open {
-      left: 0;
-    }
-    .sidebar-header {
-      padding: 1rem;
-      border-bottom: 1px solid rgba(0, 212, 255, 0.15);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .sidebar-header h3 {
-      color: #00ffff;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .close-sidebar {
-      background: rgba(0, 212, 255, 0.1);
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      color: #94a3b8;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .close-sidebar:hover {
-      background: #ef4444;
-      color: white;
-    }
-    .search-chats {
-      padding: 0.8rem;
-      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-    }
-    .search-chats input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(0, 212, 255, 0.2);
-      border-radius: 2rem;
-      padding: 0.6rem 1rem;
-      color: white;
-      font-size: 0.8rem;
-      outline: none;
-    }
-    .search-chats input:focus {
-      border-color: #00ffff;
-    }
-    .chats-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.5rem;
-    }
-    .chat-item {
-      background: rgba(0, 212, 255, 0.05);
-      border-radius: 0.8rem;
-      padding: 0.8rem;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid transparent;
-      position: relative;
-    }
-    .chat-item:hover {
-      background: rgba(0, 212, 255, 0.12);
-      border-color: rgba(0, 212, 255, 0.2);
-    }
-    .chat-item.pinned {
-      border-left: 3px solid #f59e0b;
-      background: rgba(245, 158, 11, 0.08);
-    }
-    .chat-title {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: white;
-      margin-bottom: 0.3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .chat-preview {
-      font-size: 0.7rem;
-      color: #94a3b8;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .chat-date {
-      font-size: 0.65rem;
-      color: #64748b;
-    }
-    .chat-actions {
-      display: none;
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      gap: 5px;
-    }
-    .chat-item:hover .chat-actions {
-      display: flex;
-    }
-    .chat-action-btn {
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      color: #94a3b8;
-      cursor: pointer;
-      font-size: 0.7rem;
-    }
-    .chat-action-btn:hover {
-      color: #00ffff;
-    }
-    .pin-btn.pinned {
-      color: #f59e0b;
-    }
-    .delete-chat-btn:hover {
-      color: #ef4444;
-    }
+.header{
+  padding:.7rem 1rem;
+  background:rgba(8,10,17,.72);
+  backdrop-filter:blur(24px) saturate(140%);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  z-index:50;position:relative;
+}
+.logo-row{display:flex;align-items:center;gap:10px;min-width:0;}
+.logo-row h1{
+  font-family:var(--font-display);font-size:1.15rem;font-weight:700;letter-spacing:.2px;
+  background:linear-gradient(120deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;
+  white-space:nowrap;
+}
+.model-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(138,92,255,.1);
+  border:1px solid rgba(138,92,255,.3);
+  padding:.32rem .65rem;border-radius:2rem;
+  font-size:.68rem;color:#c9b9ff;cursor:pointer;
+  white-space:nowrap;transition:all .2s;position:relative;
+}
+.model-pill:hover{background:rgba(138,92,255,.2);}
+.model-pill i.fa-chevron-down{font-size:.55rem;transition:transform .2s;}
+.model-pill.open i.fa-chevron-down{transform:rotate(180deg);}
 
-    /* Profile Section */
-    .profile-section {
-      padding: 1rem;
-      border-top: 1px solid rgba(0, 212, 255, 0.15);
-      background: rgba(0, 0, 0, 0.3);
-    }
-    .profile-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 1rem;
-      transition: all 0.2s;
-      background: rgba(255, 255, 255, 0.03);
-    }
-    .profile-card:hover {
-      background: rgba(0, 212, 255, 0.1);
-    }
-    .profile-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #00ffff, #3b82f6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .profile-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .profile-avatar i {
-      font-size: 1.5rem;
-      color: white;
-    }
-    .profile-info {
-      flex: 1;
-    }
-    .profile-name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: white;
-    }
-    .profile-email {
-      font-size: 0.7rem;
-      color: #94a3b8;
-    }
+.header-actions{display:flex;gap:6px;align-items:center;}
+.icon-btn{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  width:38px;height:38px;border-radius:50%;
+  color:var(--text-dim);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;font-size:.85rem;position:relative;
+}
+.icon-btn:hover{background:rgba(32,227,255,.12);color:var(--cyan);border-color:rgba(32,227,255,.35);transform:translateY(-1px);}
+.icon-btn.active{background:rgba(32,227,255,.18);color:var(--cyan);border-color:var(--cyan);}
 
-    /* Profile Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
-      z-index: 3000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s;
-    }
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .profile-modal {
-      background: rgba(20, 30, 45, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 1.5rem;
-      width: 90%;
-      max-width: 400px;
-      max-height: 80vh;
-      overflow-y: auto;
-      border: 1px solid rgba(0, 212, 255, 0.3);
-      padding: 1.5rem;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-    }
-    .modal-header h3 {
-      color: #00ffff;
-    }
-    .close-modal {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    .profile-field {
-      margin-bottom: 1rem;
-    }
-    .profile-field label {
-      display: block;
-      font-size: 0.7rem;
-      color: #94a3b8;
-      margin-bottom: 0.3rem;
-    }
-    .profile-field input, .profile-field textarea {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(0, 212, 255, 0.2);
-      border-radius: 0.8rem;
-      padding: 0.6rem;
-      color: white;
-      font-size: 0.85rem;
-      font-family: inherit;
-    }
-    .profile-field textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    .voice-option {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 0.5rem;
-      margin: 0.3rem 0;
-      background: rgba(0, 212, 255, 0.05);
-      border-radius: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .voice-option.selected {
-      background: rgba(0, 212, 255, 0.2);
-      border: 1px solid #00ffff;
-    }
-    .voice-option:hover {
-      background: rgba(0, 212, 255, 0.15);
-    }
-    .voice-sample {
-      background: rgba(0, 212, 255, 0.2);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-    }
-    .save-profile-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #00ffff, #3b82f6);
-      border: none;
-      border-radius: 2rem;
-      padding: 0.8rem;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
+/* Model dropdown */
+.model-dropdown{
+  position:absolute;top:calc(100% + 8px);left:1rem;
+  background:var(--surface-solid);border:1px solid var(--border-strong);
+  border-radius:var(--radius-md);padding:.4rem;width:280px;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+  opacity:0;visibility:hidden;transform:translateY(-8px);
+  transition:all .2s ease;z-index:100;
+}
+.model-dropdown.open{opacity:1;visibility:visible;transform:translateY(0);}
+.model-opt{
+  padding:.65rem .75rem;border-radius:var(--radius-sm);cursor:pointer;
+  display:flex;flex-direction:column;gap:2px;transition:background .15s;
+}
+.model-opt:hover{background:rgba(32,227,255,.08);}
+.model-opt.selected{background:rgba(32,227,255,.14);}
+.model-opt-name{font-size:.82rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;}
+.model-opt-desc{font-size:.68rem;color:var(--text-faint);}
+.model-opt.selected .model-opt-name::after{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:.62rem;color:var(--teal);margin-left:auto;}
+.model-dropdown-divider{height:1px;background:var(--border);margin:.35rem .3rem;}
+.model-dropdown-footer{padding:.5rem .75rem;font-size:.64rem;color:var(--text-faint);}
 
-    /* Menu Button */
-    .menu-btn {
-      background: rgba(0, 212, 255, 0.1);
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      color: #00ffff;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .menu-btn:hover {
-      background: rgba(0, 212, 255, 0.2);
-      transform: scale(1.05);
-    }
+/* ===== STORAGE MODE BADGE ===== */
+.storage-badge{display:inline-flex;align-items:center;gap:5px;font-size:.6rem;color:var(--text-faint);padding:.2rem .55rem;border-radius:1rem;border:1px solid var(--border);}
+.storage-badge.cloud{color:var(--teal);border-color:rgba(31,242,193,.3);}
+.storage-badge.local{color:var(--amber);border-color:rgba(255,180,84,.3);}
+.storage-badge i{font-size:.6rem;}
 
-    /* New Chat Button */
-    .new-chat-btn {
-      background: linear-gradient(135deg, #00ffff, #3b82f6);
-      border: none;
-      border-radius: 2rem;
-      padding: 0.5rem 1rem;
-      color: white;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+/* ===== CHAT ===== */
+.chat-container{flex:1;overflow-y:auto;padding:1.1rem 1rem 1.4rem;display:flex;flex-direction:column;gap:1rem;scroll-behavior:smooth;position:relative;}
+.chat-container.drag-over::after{
+  content:'Drop image or PDF to attach';
+  position:absolute;inset:.6rem;border:2px dashed var(--cyan);border-radius:var(--radius-lg);
+  display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:.9rem;font-weight:600;
+  background:rgba(32,227,255,.06);backdrop-filter:blur(2px);pointer-events:none;
+}
 
-    .header {
-      padding: 0.8rem 1.2rem;
-      background: rgba(10, 20, 30, 0.6);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0, 212, 255, 0.15);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #00ffff, #3b82f6);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-    }
-    .logo-icon i { font-size: 1.3rem; color: white; }
-    .logo h1 { font-size: 1.3rem; background: linear-gradient(135deg, #fff, #00ffff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .status-badge {
-      background: rgba(0, 255, 255, 0.12);
-      padding: 0.3rem 0.8rem;
-      border-radius: 2rem;
-      font-size: 0.65rem;
-      color: #00ffff;
-      border: 1px solid rgba(0, 255, 255, 0.25);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+.message{display:flex;gap:10px;animation:msgIn .35s cubic-bezier(.2,.8,.2,1);max-width:88%;}
+@keyframes msgIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.message.user{align-self:flex-end;flex-direction:row-reverse;}
+.message.bot{align-self:flex-start;width:100%;max-width:94%;}
 
-    .chat-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-    }
-    .chat-container::-webkit-scrollbar { width: 3px; }
-    .chat-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
-    .chat-container::-webkit-scrollbar-thumb { background: #00ffff; border-radius: 10px; }
+.avatar{width:32px;height:32px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.avatar.bot-avatar{background:linear-gradient(135deg,#161b2c,#0b0e16);border:1px solid rgba(32,227,255,.3);}
+.avatar.user-avatar{background:linear-gradient(135deg,var(--violet),var(--cyan));}
+.avatar i{font-size:.85rem;color:#fff;}
 
-    .message {
-      display: flex;
-      gap: 10px;
-      animation: messageIn 0.3s ease;
-      max-width: 88%;
-    }
-    @keyframes messageIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .message.user { align-self: flex-end; flex-direction: row-reverse; }
-    .message.bot { align-self: flex-start; width: 100%; max-width: 92%; }
+.bubble{
+  background:var(--surface);backdrop-filter:blur(14px);
+  border-radius:var(--radius-md);padding:.7rem 1rem;
+  border:1px solid var(--border);color:#e6eaf3;
+  line-height:1.6;font-size:.87rem;width:100%;position:relative;
+  cursor:default;
+}
+.user .bubble{
+  background:linear-gradient(135deg,rgba(32,227,255,.16),rgba(138,92,255,.16));
+  border:1px solid rgba(32,227,255,.28);
+}
+.message-text{white-space:normal;word-wrap:break-word;}
+.message-text .md-p{margin:0 0 .55em 0;}
+.message-text .md-p:last-child{margin-bottom:0;}
+.message-text .md-space{height:.4em;}
+.message-text .md-h1{font-size:1.12rem;font-weight:700;margin:.55em 0 .3em;color:#fff;}
+.message-text .md-h2{font-size:1.02rem;font-weight:650;margin:.5em 0 .28em;color:#fff;}
+.message-text .md-h3{font-size:.93rem;font-weight:600;margin:.45em 0 .24em;color:#fff;}
+.message-text ul,.message-text ol{margin:.2em 0 .5em 1.25em;}
+.message-text li{margin:.18em 0;}
+.message-text blockquote{border-left:2px solid var(--cyan);padding:.1em 0 .1em .7em;color:var(--text-dim);margin:.3em 0;}
+.message-text a{color:var(--cyan);text-decoration:underline;text-underline-offset:2px;}
+.message-text strong{color:#fff;font-weight:650;}
+.message-text em{color:#dbe4f5;}
+.message-text code:not(pre code){background:rgba(32,227,255,.12);color:#7fe7ff;padding:.1em .4em;border-radius:5px;font-family:var(--font-mono);font-size:.85em;}
+.typing-cursor{display:inline-block;width:2px;height:1em;background:var(--cyan);vertical-align:text-bottom;margin-left:1px;animation:blink 1s step-start infinite;}
+@keyframes blink{50%{opacity:0;}}
 
-    .avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(0, 212, 255, 0.3);
-      flex-shrink: 0;
-    }
-    .user .avatar { background: linear-gradient(135deg, #00d4ff, #3b82f6); }
-    .avatar i { font-size: 0.9rem; }
+.edit-message-btn,.delete-message-btn{
+  position:absolute;top:-10px;background:var(--surface-solid);border:1px solid var(--border-strong);
+  border-radius:50%;width:24px;height:24px;font-size:.62rem;cursor:pointer;
+  opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center;
+}
+.edit-message-btn{right:34px;color:var(--cyan);}
+.delete-message-btn{right:4px;color:var(--red);}
+.message.user:hover .edit-message-btn,.message.user:hover .delete-message-btn{opacity:1;}
+@media(max-width:768px){.edit-message-btn,.delete-message-btn{opacity:.65;}}
 
-    .bubble {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border-radius: 1.2rem;
-      padding: 0.7rem 1rem;
-      border: 1px solid rgba(0, 212, 255, 0.15);
-      color: #e2e8f0;
-      line-height: 1.5;
-      font-size: 0.85rem;
-      width: 100%;
-      position: relative;
-    }
-    .user .bubble {
-      background: linear-gradient(135deg, rgba(0, 212, 255, 0.85), rgba(59, 130, 246, 0.75));
-      border: none;
-    }
+/* Code blocks */
+.code-block{position:relative;background:#0a0d14;border-radius:var(--radius-sm);margin:.6rem 0;overflow:hidden;border:1px solid rgba(124,140,255,.18);}
+.code-block pre{overflow-x:auto;margin:0;}
+.code-block code{font-family:var(--font-mono) !important;font-size:.78rem !important;}
+.code-header{display:flex;justify-content:space-between;align-items:center;padding:.45rem .7rem;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(124,140,255,.14);}
+.code-lang{font-size:.66rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;font-family:var(--font-mono);}
+.code-btns{display:flex;gap:4px;}
+.code-btn{background:rgba(255,255,255,.05);border:1px solid transparent;color:var(--text-dim);cursor:pointer;font-size:.65rem;padding:.25rem .55rem;border-radius:6px;display:flex;align-items:center;gap:4px;transition:all .15s;}
+.code-btn:hover{background:rgba(32,227,255,.15);color:var(--cyan);}
 
-    .edit-message-btn, .delete-message-btn {
-      position: absolute;
-      top: -8px;
-      background: rgba(0, 212, 255, 0.3);
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s;
-      backdrop-filter: blur(4px);
-    }
-    .edit-message-btn { right: 16px; color: #00ffff; }
-    .delete-message-btn { right: -8px; color: #ef4444; }
-    .message.user:hover .edit-message-btn,
-    .message.user:hover .delete-message-btn {
-      opacity: 1;
-    }
-    @media (max-width: 768px) {
-      .edit-message-btn, .delete-message-btn { opacity: 0.6; }
-    }
+.message-actions{display:flex;gap:4px;margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border);flex-wrap:wrap;}
+.action-icon{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:.68rem;padding:.3rem .55rem;border-radius:8px;display:inline-flex;align-items:center;gap:4px;transition:all .15s;}
+.action-icon:hover{background:rgba(32,227,255,.12);color:var(--cyan);}
+.action-icon:disabled{opacity:.35;cursor:not-allowed;}
+.action-icon.speaking{color:var(--teal);}
 
-    .code-block {
-      position: relative;
-      background: #0d1117;
-      border-radius: 10px;
-      margin: 8px 0;
-      overflow-x: auto;
-      border: 1px solid #30363d;
-    }
-    .code-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 10px;
-      background: #161b22;
-      font-size: 0.7rem;
-      color: #8b949e;
-    }
-    .copy-code-btn {
-      background: none;
-      border: none;
-      color: #58a6ff;
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 6px;
-    }
+.typing-indicator{display:flex;gap:5px;padding:4px 2px;}
+.typing-indicator span{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:bounce 1.3s infinite;}
+.typing-indicator span:nth-child(2){animation-delay:.15s;}
+.typing-indicator span:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.35;}30%{transform:translateY(-7px);opacity:1;}}
 
-    .message-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-      padding-top: 6px;
-      border-top: 1px solid rgba(0, 212, 255, 0.15);
-      flex-wrap: wrap;
-    }
-    .action-icon {
-      background: none;
-      border: none;
-      color: #64748b;
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 4px 8px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-    .action-icon:hover { background: rgba(0, 255, 255, 0.15); color: #00ffff; }
+.message-image,.generated-img{max-width:220px;border-radius:12px;margin-top:8px;cursor:pointer;border:1px solid var(--border-strong);display:block;}
+.generated-img-wrap{position:relative;display:inline-block;}
+.img-download-btn{position:absolute;bottom:14px;right:6px;background:rgba(5,6,10,.75);border:1px solid var(--border-strong);color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.7rem;}
+.style-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:.5rem;}
+.style-chip{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-dim);font-size:.68rem;padding:.35rem .7rem;border-radius:1rem;cursor:pointer;transition:all .15s;}
+.style-chip.selected{background:rgba(32,227,255,.16);border-color:var(--cyan);color:var(--cyan);}
 
-    .typing-indicator {
-      display: flex;
-      gap: 5px;
-      padding: 6px 0;
-    }
-    .typing-indicator span {
-      width: 7px;
-      height: 7px;
-      background: #00ffff;
-      border-radius: 50%;
-      animation: typingBounce 1.3s infinite;
-    }
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-      30% { transform: translateY(-8px); opacity: 1; }
-    }
+.file-preview{display:flex;align-items:center;gap:8px;background:rgba(32,227,255,.08);border:1px solid rgba(32,227,255,.25);border-radius:var(--radius-sm);padding:.5rem .7rem;margin:0 0 .5rem;font-size:.75rem;}
+.file-preview img{width:32px;height:32px;object-fit:cover;border-radius:6px;}
+.remove-file{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:.8rem;}
+.remove-file:hover{color:var(--red);}
 
-    .message-image, .generated-img {
-      max-width: 180px;
-      border-radius: 10px;
-      margin-top: 6px;
-      cursor: pointer;
-      border: 1px solid rgba(0, 212, 255, 0.4);
-    }
+/* ===== INPUT ===== */
+.input-wrapper{padding:.75rem .9rem calc(.75rem + env(safe-area-inset-bottom));background:rgba(8,10,17,.75);backdrop-filter:blur(24px);border-top:1px solid var(--border);position:relative;}
+.input-wrapper.drag-over .input-box{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(32,227,255,.15);}
+.input-box{background:var(--surface-solid);border-radius:1.6rem;border:1px solid var(--border-strong);display:flex;align-items:flex-end;gap:4px;padding:.3rem .3rem .3rem 1rem;transition:border-color .2s,box-shadow .2s;}
+.input-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(32,227,255,.1);}
+#userInput{flex:1;background:transparent;border:none;color:#fff;font-size:.87rem;padding:.65rem 0;resize:none;font-family:inherit;outline:none;max-height:140px;line-height:1.4;}
+#userInput::placeholder{color:var(--text-faint);}
+.action-buttons{display:flex;gap:4px;align-items:center;}
+.action-btn{background:rgba(255,255,255,.04);border:none;width:36px;height:36px;border-radius:50%;color:var(--text-dim);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.action-btn:hover{background:rgba(32,227,255,.14);color:var(--cyan);}
+.action-btn.active{background:rgba(32,227,255,.18);color:var(--cyan);}
+.action-btn.mic-active{background:var(--red);color:#fff;animation:pulseMic 1.4s infinite;}
+@keyframes pulseMic{0%,100%{box-shadow:0 0 0 0 rgba(255,92,114,.5);}50%{box-shadow:0 0 0 8px rgba(255,92,114,0);}}
+.send-btn{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;}
+.send-btn.stop-mode{background:var(--red);}
+.input-hint{text-align:center;font-size:.62rem;color:var(--text-faint);margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
 
-    .input-wrapper {
-      padding: 0.8rem 1rem;
-      background: rgba(10, 20, 30, 0.8);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(0, 212, 255, 0.15);
-    }
-    .input-container { max-width: 100%; margin: 0 auto; }
-    .input-box {
-      background: rgba(20, 30, 45, 0.9);
-      border-radius: 2rem;
-      border: 1px solid rgba(0, 212, 255, 0.25);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.3rem 0.3rem 0.3rem 1rem;
-    }
-    .input-box:focus-within { border-color: #00ffff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.15); }
-    #userInput {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 0.85rem;
-      padding: 0.7rem 0;
-      resize: none;
-      font-family: inherit;
-      outline: none;
-      max-height: 80px;
-    }
-    .action-btn {
-      background: rgba(0, 212, 255, 0.1);
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      color: #94a3b8;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .action-btn:hover { background: #00ffff; color: #0a0a0f; transform: scale(1.05); }
-    .send-btn { background: linear-gradient(135deg, #00ffff, #3b82f6); color: white; }
+/* ===== VOICE MODE OVERLAY ===== */
+.voice-overlay{position:fixed;inset:0;z-index:4000;background:radial-gradient(circle at 50% 40%, rgba(32,227,255,.08), rgba(5,6,10,.97) 65%);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.voice-orb{width:150px;height:150px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;}
+.voice-orb-core{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #4be3ff, #7c5cff 60%, #2a1f6b);box-shadow:0 0 60px rgba(32,227,255,.5);transition:transform .1s ease-out;}
+.voice-orb.listening .voice-orb-core{animation:orbListen 1.6s ease-in-out infinite;}
+.voice-orb.thinking .voice-orb-core{animation:orbThink 1s linear infinite;}
+.voice-orb.speaking .voice-orb-core{animation:orbSpeak .5s ease-in-out infinite alternate;}
+@keyframes orbListen{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+@keyframes orbThink{0%{transform:rotate(0) scale(1);}50%{transform:rotate(180deg) scale(.94);}100%{transform:rotate(360deg) scale(1);}}
+@keyframes orbSpeak{from{transform:scale(1);}to{transform:scale(1.14);}}
+.voice-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(32,227,255,.35);}
+.voice-ring.r2{inset:-16px;border-color:rgba(138,92,255,.25);}
+.voice-orb.listening .voice-ring{animation:ringPulse 2s ease-out infinite;}
+@keyframes ringPulse{0%{transform:scale(.9);opacity:.8;}100%{transform:scale(1.4);opacity:0;}}
+.voice-status-text{font-family:var(--font-display);font-size:1rem;color:var(--text);letter-spacing:.3px;min-height:1.4em;}
+.voice-transcript{max-width:88%;text-align:center;color:var(--text-dim);font-size:.82rem;min-height:1.4em;padding:0 1rem;}
+.voice-controls{display:flex;gap:14px;margin-top:.5rem;}
+.voice-ctrl-btn{width:54px;height:54px;border-radius:50%;border:1px solid var(--border-strong);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;}
+.voice-ctrl-btn:hover{background:rgba(255,255,255,.09);}
+.voice-ctrl-btn.exit{background:var(--red);border-color:var(--red);color:#fff;}
+.voice-ctrl-btn.mute.muted{background:var(--amber);border-color:var(--amber);color:#0a0a0f;}
+.voice-model-note{font-size:.66rem;color:var(--text-faint);}
 
-    .voice-overlay {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(20px);
-      padding: 12px 20px;
-      border-radius: 50px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      z-index: 1000;
-      border: 1px solid #00ffff;
-      animation: fadeUp 0.2s ease;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-    .wave-container { display: flex; gap: 4px; height: 30px; align-items: center; }
-    .wave {
-      width: 3px;
-      background: #00ffff;
-      border-radius: 2px;
-      animation: waveAnim 0.6s infinite ease alternate;
-    }
-    @keyframes waveAnim {
-      0% { transform: scaleY(0.5); opacity: 0.5; height: 10px; }
-      100% { transform: scaleY(1.2); opacity: 1; height: 25px; }
-    }
+/* ===== SIDEBAR ===== */
+.sidebar{position:fixed;top:0;left:-100%;width:320px;height:100%;background:rgba(6,8,14,.97);backdrop-filter:blur(30px);border-right:1px solid var(--border);z-index:2000;transition:left .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:10px 0 40px rgba(0,0,0,.5);}
+.sidebar.open{left:0;}
+.sidebar-scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1999;opacity:0;visibility:hidden;transition:opacity .3s;}
+.sidebar-scrim.open{opacity:1;visibility:visible;}
+.sidebar-header{padding:1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.sidebar-header h3{color:var(--text);font-size:1rem;font-family:var(--font-display);display:flex;align-items:center;gap:8px;font-weight:600;}
+.new-chat-btn{background:linear-gradient(135deg,var(--cyan),var(--violet));border:none;border-radius:1.6rem;padding:.5rem .9rem;color:#fff;font-size:.76rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.close-sidebar{background:rgba(255,255,255,.05);border:none;width:32px;height:32px;border-radius:50%;color:var(--text-dim);cursor:pointer;flex-shrink:0;}
+.close-sidebar:hover{background:var(--red);color:#fff;}
+.search-chats{padding:.7rem .8rem;border-bottom:1px solid var(--border);}
+.search-chats input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:2rem;padding:.55rem 1rem;color:#fff;font-size:.78rem;outline:none;}
+.search-chats input:focus{border-color:var(--cyan);}
+.chats-list{flex:1;overflow-y:auto;padding:.5rem;}
+.chat-item{background:rgba(255,255,255,.02);border-radius:.8rem;padding:.75rem .8rem;margin-bottom:.4rem;cursor:pointer;transition:all .15s;border:1px solid transparent;position:relative;}
+.chat-item:hover{background:rgba(32,227,255,.07);border-color:var(--border);}
+.chat-item.active{background:rgba(32,227,255,.1);border-color:rgba(32,227,255,.3);}
+.chat-item.pinned{border-left:2px solid var(--amber);}
+.chat-title{font-size:.82rem;font-weight:500;color:var(--text);margin-bottom:.3rem;padding-right:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chat-preview{font-size:.68rem;color:var(--text-faint);display:flex;justify-content:space-between;}
+.chat-actions{display:none;position:absolute;right:8px;top:8px;gap:4px;}
+.chat-item:hover .chat-actions{display:flex;}
+.chat-action-btn{background:rgba(0,0,0,.5);border:none;border-radius:50%;width:26px;height:26px;color:var(--text-dim);cursor:pointer;font-size:.65rem;}
+.chat-action-btn:hover{color:var(--cyan);}
+.pin-btn.pinned{color:var(--amber);}
+.delete-chat-btn:hover{color:var(--red);}
 
-    .footer-note {
-      position: fixed;
-      bottom: 8px;
-      right: 12px;
-      font-size: 0.55rem;
-      color: #475569;
-      background: rgba(0,0,0,0.4);
-      padding: 2px 8px;
-      border-radius: 16px;
-    }
+.profile-section{padding:.8rem;border-top:1px solid var(--border);background:rgba(0,0,0,.2);display:flex;flex-direction:column;gap:.5rem;}
+.profile-card{display:flex;align-items:center;gap:11px;cursor:pointer;padding:.5rem;border-radius:1rem;transition:all .2s;}
+.profile-card:hover{background:rgba(32,227,255,.08);}
+.profile-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--violet));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.profile-avatar i{font-size:1.2rem;color:#fff;}
+.profile-info{flex:1;min-width:0;}
+.profile-name{font-size:.85rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.profile-email{font-size:.66rem;color:var(--text-faint);}
 
-    .export-options {
-      display: flex;
-      gap: 10px;
-      margin-top: 1rem;
-    }
-    .export-options button {
-      flex: 1;
-      background: rgba(0, 212, 255, 0.2);
-      border: none;
-      border-radius: 0.8rem;
-      padding: 0.6rem;
-      color: white;
-      cursor: pointer;
-    }
+/* ===== MODALS ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);z-index:3000;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .25s;padding:1rem;}
+.modal-overlay.active{opacity:1;visibility:visible;}
+.modal-box{background:rgba(14,17,27,.97);backdrop-filter:blur(20px);border-radius:1.4rem;width:100%;max-width:440px;max-height:85vh;overflow-y:auto;border:1px solid var(--border-strong);padding:1.4rem;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);}
+.modal-header h3{color:var(--text);font-family:var(--font-display);font-size:1.05rem;display:flex;align-items:center;gap:8px;}
+.close-modal{background:none;border:none;color:var(--text-dim);font-size:1.05rem;cursor:pointer;}
+.form-field{margin-bottom:1rem;}
+.form-field label{display:block;font-size:.7rem;color:var(--text-dim);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.form-field input[type="text"],.form-field textarea,.form-field select{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:.8rem;padding:.65rem .75rem;color:#fff;font-size:.85rem;font-family:inherit;outline:none;}
+.form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:var(--cyan);}
+.form-field textarea{resize:vertical;min-height:80px;}
+.form-hint{font-size:.65rem;color:var(--text-faint);margin-top:.35rem;}
+.style-select-row{display:flex;gap:6px;}
+.style-select-row button{flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-dim);padding:.5rem .3rem;border-radius:.7rem;font-size:.72rem;cursor:pointer;}
+.style-select-row button.selected{background:rgba(32,227,255,.15);border-color:var(--cyan);color:var(--cyan);}
+.slider-row{display:flex;align-items:center;gap:10px;}
+.slider-row input[type="range"]{flex:1;accent-color:var(--cyan);}
+.slider-row span{font-size:.72rem;color:var(--text-dim);width:34px;text-align:right;}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:.82rem;color:var(--text);}
+.toggle-desc{font-size:.68rem;color:var(--text-faint);margin-top:2px;}
+.switch{position:relative;width:42px;height:24px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;background:rgba(255,255,255,.12);border-radius:20px;cursor:pointer;transition:.2s;}
+.slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+input:checked + .slider{background:linear-gradient(135deg,var(--cyan),var(--violet));}
+input:checked + .slider::before{transform:translateX(18px);}
 
-    @media (max-width: 480px) {
-      .chat-container { padding: 0.7rem; }
-      .bubble { font-size: 0.8rem; padding: 0.6rem 0.9rem; }
-      .action-btn { width: 34px; height: 34px; }
-      .message { max-width: 92%; }
-      .message.bot { max-width: 95%; }
-      .avatar { width: 30px; height: 30px; }
-      .sidebar { width: 85%; left: -85%; }
-    }
-  </style>
+.voice-option{display:flex;align-items:center;gap:12px;padding:.55rem;margin:.3rem 0;background:rgba(255,255,255,.03);border-radius:.8rem;cursor:pointer;transition:all .2s;border:1px solid transparent;}
+.voice-option.selected{background:rgba(32,227,255,.12);border-color:var(--cyan);}
+.voice-option:hover{background:rgba(32,227,255,.08);}
+.voice-sample{background:rgba(32,227,255,.15);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:var(--cyan);flex-shrink:0;}
+.save-btn{width:100%;background:linear-gradient(135deg,var(--cyan),var(--violet));border:none;border-radius:1.6rem;padding:.75rem;color:#fff;font-weight:600;cursor:pointer;margin-top:.4rem;font-size:.85rem;}
+.save-btn:hover{opacity:.92;}
+.danger-btn{width:100%;background:rgba(255,92,114,.12);border:1px solid rgba(255,92,114,.4);border-radius:1.6rem;padding:.7rem;color:var(--red);font-weight:600;cursor:pointer;margin-top:.6rem;font-size:.82rem;}
+.danger-btn:hover{background:rgba(255,92,114,.2);}
+.settings-section-title{font-size:.68rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin:1.2rem 0 .5rem;}
+.settings-section-title:first-child{margin-top:0;}
+
+.export-options{display:flex;gap:10px;margin-top:.5rem;flex-wrap:wrap;}
+.export-options button{flex:1;min-width:100px;background:rgba(32,227,255,.12);border:1px solid var(--border);border-radius:.8rem;padding:.65rem;color:#fff;cursor:pointer;font-size:.78rem;}
+.export-options button:hover{background:rgba(32,227,255,.2);}
+
+.about-body{font-size:.82rem;color:var(--text-dim);line-height:1.7;}
+.about-body strong{color:var(--text);}
+
+.toast-stack{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column-reverse;gap:8px;z-index:5000;align-items:center;}
+.toast{color:#05060a;font-weight:600;padding:.55rem 1.1rem;border-radius:50px;font-size:.78rem;animation:fadeUp .3s ease;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.4);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.welcome-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1rem;gap:1rem;flex:1;}
+.welcome-title{font-family:var(--font-display);font-size:1.5rem;font-weight:600;background:linear-gradient(120deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.welcome-sub{color:var(--text-faint);font-size:.82rem;max-width:280px;}
+.suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:.6rem;}
+.chip{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-dim);font-size:.72rem;padding:.5rem .85rem;border-radius:1.2rem;cursor:pointer;transition:all .2s;}
+.chip:hover{background:rgba(32,227,255,.1);border-color:rgba(32,227,255,.4);color:var(--cyan);}
+
+.kbd-hint{font-size:.6rem;color:var(--text-faint);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:var(--font-mono);}
+
+@media(max-width:480px){
+  .chat-container{padding:.85rem;}
+  .bubble{font-size:.82rem;padding:.6rem .85rem;}
+  .message{max-width:94%;}
+  .message.bot{max-width:97%;}
+  .sidebar{width:86%;left:-86%;}
+  .logo-row h1{font-size:1.02rem;}
+  .model-pill span.model-label{display:none;}
+}
+</style>
 </head>
 <body>
 
-<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<div class="noise"></div>
 
+<!-- SPLASH -->
 <div class="splash" id="splashScreen">
   <div class="splash-content">
-    <div class="splash-logo"><i class="fas fa-vortex"></i></div>
-    <div class="splash-text">VORTEX AI</div>
+    <div class="splash-logo-wrap">
+      <div class="vortex-mark">
+        <svg width="88" height="88" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="gradA" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#20e3ff"/>
+              <stop offset="100%" stop-color="#8a5cff"/>
+            </linearGradient>
+          </defs>
+          <g class="vortex-spin">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="url(#gradA)" stroke-width="2" stroke-dasharray="10 8" opacity="0.55"/>
+          </g>
+          <g class="vortex-spin-rev">
+            <path d="M50 14 A36 36 0 1 1 14 50" fill="none" stroke="url(#gradA)" stroke-width="3.5" stroke-linecap="round"/>
+          </g>
+          <path d="M50 26 A24 24 0 1 0 74 50" fill="none" stroke="#20e3ff" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="8" fill="url(#gradA)"/>
+        </svg>
+      </div>
+    </div>
+    <div class="splash-title">VORTEX AI</div>
+    <div class="splash-sub">Intelligence, unleashed</div>
     <div class="splash-loader"><div class="splash-loader-bar"></div></div>
-    <div style="margin-top: 12px; font-size: 0.7rem; color: #4a5568;" id="splashStatus">Initializing Neural Core...</div>
+    <div class="splash-status" id="splashStatus">Spinning up the core…</div>
+    <button class="splash-retry" id="splashRetryBtn">Taking a while — continue anyway</button>
   </div>
 </div>
 
+<!-- APP -->
 <div class="app" id="app">
   <div class="header">
-    <div class="logo">
-      <div class="logo-icon"><i class="fas fa-robot"></i></div>
+    <div class="logo-row">
+      <div class="vortex-mark">
+        <svg width="34" height="34" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="gradB" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#20e3ff"/>
+              <stop offset="100%" stop-color="#8a5cff"/>
+            </linearGradient>
+          </defs>
+          <path d="M50 14 A36 36 0 1 1 14 50" fill="none" stroke="url(#gradB)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M50 26 A24 24 0 1 0 74 50" fill="none" stroke="#20e3ff" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="9" fill="url(#gradB)"/>
+        </svg>
+      </div>
       <h1>Vortex AI</h1>
     </div>
     <div class="header-actions">
-      <div class="status-badge" id="statusBadge"><i class="fas fa-circle" style="font-size: 0.4rem; color: #f59e0b;"></i> <span>Connecting</span></div>
-      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+      <div class="model-pill" id="modelPill"><i class="fas fa-microchip"></i><span class="model-label" id="modelPillLabel">Vortex Nova</span><i class="fas fa-chevron-down"></i></div>
+      <div class="model-dropdown" id="modelDropdown"></div>
+      <button class="icon-btn" id="muteBtn" title="Mute voice replies"><i class="fas fa-volume-up"></i></button>
+      <button class="icon-btn" id="menuBtn" title="Chats (Ctrl+K)"><i class="fas fa-bars"></i></button>
     </div>
   </div>
 
-  <div class="chat-container" id="chatContainer">
-    <div class="message bot" id="greetingMessage">
-      <div class="avatar"><i class="fas fa-brain"></i></div>
-      <div class="bubble">
-        <div class="message-text">
-          👋 Hey! I'm Vortex — your intelligent assistant.<br><br>
-          ✨ <strong>Features:</strong><br>
-          • 📎 Upload images or PDFs for analysis<br>
-          • 🎨 Click the image button to generate AI art<br>
-          • 🎤 Press and hold the mic to speak<br>
-          • ✏️ Hover over your message → edit or delete ✏️<br>
-          • 📚 Chat history with search and pin<br>
-          • 💾 Cross-chat memory (I remember across conversations!)<br>
-          • 🎙️ Choose your preferred voice (6 unique voices with different pitches)<br>
-          • 📄 Export chats as PDF/TXT<br><br>
-          Ask me anything!
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="chat-container" id="chatContainer"></div>
 
-  <div class="input-wrapper">
-    <div class="input-container">
-      <div class="input-box">
-        <textarea id="userInput" rows="1" placeholder="Ask me anything..."></textarea>
-        <div class="action-buttons">
-          <button class="action-btn" id="attachBtn" title="Upload Image/Document"><i class="fas fa-paperclip"></i></button>
-          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display: none;">
-          <button class="action-btn" id="generateImageBtn" title="Generate AI Image"><i class="fas fa-image"></i></button>
-          <button class="action-btn" id="voiceBtn" title="Press and hold to speak"><i class="fas fa-microphone"></i></button>
-          <button class="action-btn send-btn" id="sendBtn"><i class="fas fa-arrow-up"></i></button>
-        </div>
+  <div class="input-wrapper" id="inputWrapper">
+    <div id="filePreviewArea"></div>
+    <div class="input-box">
+      <textarea id="userInput" rows="1" placeholder="Message Vortex AI…" aria-label="Message input"></textarea>
+      <div class="action-buttons">
+        <button class="action-btn" id="attachBtn" title="Attach image or PDF"><i class="fas fa-paperclip"></i></button>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" style="display:none;">
+        <button class="action-btn" id="generateImageBtn" title="Generate an image"><i class="fas fa-wand-magic-sparkles"></i></button>
+        <button class="action-btn" id="voiceModeBtn" title="Voice mode"><i class="fas fa-microphone"></i></button>
+        <button class="action-btn send-btn" id="sendBtn" title="Send (Enter)"><i class="fas fa-arrow-up"></i></button>
       </div>
-      <div id="filePreviewArea"></div>
+    </div>
+    <div class="input-hint">
+      <span>Vortex AI can make mistakes. Verify important information.</span>
+      <span class="storage-badge" id="storageBadge"><i class="fas fa-circle-notch fa-spin"></i> Connecting</span>
     </div>
   </div>
-  <div class="footer-note">Vortex AI • Press & Hold Mic to Speak</div>
 </div>
 
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
+<!-- VOICE MODE OVERLAY -->
+<div class="voice-overlay" id="voiceOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Voice mode">
+  <div class="voice-orb" id="voiceOrb">
+    <div class="voice-ring"></div>
+    <div class="voice-ring r2"></div>
+    <div class="voice-orb-core" id="voiceOrbCore"></div>
+  </div>
+  <div class="voice-status-text" id="voiceStatusText">Listening…</div>
+  <div class="voice-transcript" id="voiceTranscript"></div>
+  <div class="voice-controls">
+    <button class="voice-ctrl-btn mute" id="voiceMuteBtn" title="Mute mic"><i class="fas fa-microphone"></i></button>
+    <button class="voice-ctrl-btn exit" id="voiceExitBtn" title="Exit voice mode"><i class="fas fa-xmark"></i></button>
+  </div>
+  <div class="voice-model-note">Talking to <span id="voiceModelNote">Vortex Nova</span></div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+<div class="sidebar" id="sidebar" role="dialog" aria-label="Chat history">
   <div class="sidebar-header">
     <h3><i class="fas fa-comments"></i> Chats</h3>
-    <button class="new-chat-btn" id="newChatBtn"><i class="fas fa-plus"></i> New Chat</button>
-    <button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="new-chat-btn" id="newChatBtn"><i class="fas fa-plus"></i> New</button>
+      <button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
+    </div>
   </div>
-  <div class="search-chats">
-    <input type="text" id="searchChatsInput" placeholder="🔍 Search chats...">
-  </div>
-  <div class="chats-list" id="chatsList">
-    <div style="text-align: center; padding: 2rem; color: #64748b;">Loading chats...</div>
-  </div>
+  <div class="search-chats"><input type="text" id="searchChatsInput" placeholder="Search chats… (Ctrl+K)"></div>
+  <div class="chats-list" id="chatsList"><div style="text-align:center;padding:2rem;color:var(--text-faint);font-size:.8rem;">Loading chats…</div></div>
   <div class="profile-section" id="profileSection">
     <div class="profile-card" id="profileCard">
-      <div class="profile-avatar" id="profileAvatar">
-        <i class="fas fa-user-astronaut"></i>
-      </div>
+      <div class="profile-avatar" id="profileAvatar"><i class="fas fa-user-astronaut"></i></div>
       <div class="profile-info">
-        <div class="profile-name" id="profileName">Guest User</div>
+        <div class="profile-name" id="profileName">Guest</div>
         <div class="profile-email" id="profileEmail">Not signed in</div>
       </div>
-      <i class="fas fa-chevron-right" style="color: #64748b;"></i>
+      <i class="fas fa-chevron-right" style="color:var(--text-faint);font-size:.75rem;"></i>
     </div>
   </div>
 </div>
 
-<!-- Profile Modal -->
+<!-- PROFILE / SETTINGS MODAL -->
 <div class="modal-overlay" id="profileModal">
-  <div class="profile-modal">
-    <div class="modal-header">
-      <h3><i class="fas fa-user-circle"></i> Your Profile</h3>
-      <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fas fa-user-gear"></i> Settings</h3><button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button></div>
+
+    <div class="settings-section-title">Profile</div>
+    <div class="form-field">
+      <label>Your name</label>
+      <input type="text" id="userDisplayName" placeholder="How should I address you?">
     </div>
-    <div id="profileModalContent">
-      <div class="profile-field">
-        <label>Your Name</label>
-        <input type="text" id="userDisplayName" placeholder="How should I call you?">
-      </div>
-      <div class="profile-field">
-        <label>Personal Info (I'll remember this)</label>
-        <textarea id="userPersonalInfo" placeholder="e.g., I'm a developer, I love Python, my birthday is in March..."></textarea>
-      </div>
-      <div class="profile-field">
-        <label>Preferred Voice</label>
-        <div id="voiceOptionsList"></div>
-      </div>
-      <button class="save-profile-btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save Preferences</button>
+    <div class="form-field">
+      <label>About you</label>
+      <textarea id="userPersonalInfo" placeholder="e.g. I'm a backend developer, I prefer short answers, I'm learning Spanish…"></textarea>
+      <div class="form-hint">Vortex uses this to personalize replies across every chat.</div>
     </div>
+
+    <div class="settings-section-title">Responses</div>
+    <div class="form-field">
+      <label>Reply length</label>
+      <div class="style-select-row" id="responseStyleRow">
+        <button data-style="concise">Concise</button>
+        <button data-style="balanced">Balanced</button>
+        <button data-style="detailed">Detailed</button>
+      </div>
+    </div>
+    <div class="form-field">
+      <label>Creativity</label>
+      <div class="slider-row">
+        <input type="range" id="creativitySlider" min="0" max="100" value="50">
+        <span id="creativityValue">50%</span>
+      </div>
+      <div class="form-hint">Lower = more focused and predictable. Higher = more varied and imaginative.</div>
+    </div>
+
+    <div class="settings-section-title">Voice</div>
+    <div class="form-field">
+      <div id="voiceOptionsList"></div>
+    </div>
+    <div class="form-field">
+      <div class="toggle-row">
+        <div><div class="toggle-label">Auto-read replies</div><div class="toggle-desc">Speak new responses out loud automatically</div></div>
+        <label class="switch"><input type="checkbox" id="autoSpeakToggle"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <button class="save-btn" id="saveProfileBtn"><i class="fas fa-save"></i> Save settings</button>
+
+    <div class="settings-section-title">Data</div>
+    <div class="form-hint" id="dataStatusText">Checking storage status…</div>
+    <button class="danger-btn" id="clearDataBtn"><i class="fas fa-trash"></i> Clear all chats &amp; data</button>
   </div>
 </div>
 
-<!-- Export Modal -->
+<!-- EXPORT MODAL -->
 <div class="modal-overlay" id="exportModal">
-  <div class="profile-modal" style="max-width: 350px;">
-    <div class="modal-header">
-      <h3><i class="fas fa-download"></i> Export Chat</h3>
-      <button class="close-modal" id="closeExportBtn"><i class="fas fa-times"></i></button>
-    </div>
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-header"><h3><i class="fas fa-download"></i> Export chat</h3><button class="close-modal" id="closeExportBtn"><i class="fas fa-times"></i></button></div>
     <div class="export-options">
       <button id="exportTxtBtn"><i class="fas fa-file-alt"></i> TXT</button>
-      <button id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+      <button id="exportMdBtn"><i class="fab fa-markdown"></i> Markdown</button>
+      <button id="copyAllBtn"><i class="fas fa-copy"></i> Copy all</button>
     </div>
   </div>
 </div>
 
+<!-- ABOUT MODAL -->
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box">
+    <div class="modal-header"><h3><i class="fas fa-circle-info"></i> About Vortex AI</h3><button class="close-modal" id="closeAboutBtn"><i class="fas fa-times"></i></button></div>
+    <div class="about-body" id="aboutBody"></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
 <script>
-  // ==================== FIREBASE REALTIME DATABASE INITIALIZATION ====================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBD21w845BJM_RMz90s-3Hxj80nrhMxly4",
-    authDomain: "vortex-ai-56177.firebaseapp.com",
-    databaseURL: "https://vortex-ai-56177-default-rtdb.firebaseio.com/",
-    projectId: "vortex-ai-56177",
-    storageBucket: "vortex-ai-56177.firebasestorage.app",
-    messagingSenderId: "746045419077",
-    appId: "1:746045419077:web:250d5360ee6f493d77bd2c",
-    measurementId: "G-7E814PXDZZ"
-  };
-  
-  // Initialize Firebase
+'use strict';
+/* =========================================================================
+   VORTEX AI — APPLICATION SCRIPT
+   Sections:
+     1. Firebase bootstrap
+     2. Store — unified cloud (Firebase) / local (localStorage) data layer
+     3. Constants — models, voices, code extensions, identity prompt
+     4. DOM references
+     5. Voice synthesis helpers
+     6. Model dropdown
+     7. Profile / settings
+     8. Chat list + chat CRUD (via Store)
+     9. Cross-chat memory
+    10. Rendering — messages, markdown-lite, code blocks, typewriter
+    11. API communication (send / stop / regenerate)
+    12. Utilities — toast queue, dates, escaping
+    13. Voice mode (voice-to-voice) incl. live waveform
+    14. File attach, drag & drop, paste
+    15. Image generation
+    16. Export
+    17. Keyboard shortcuts + misc event wiring
+    18. Boot sequence
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------- *
+ * 1. FIREBASE BOOTSTRAP
+ * ---------------------------------------------------------------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyBD21w845BJM_RMz90s-3Hxj80nrhMxly4",
+  authDomain: "vortex-ai-56177.firebaseapp.com",
+  databaseURL: "https://vortex-ai-56177-default-rtdb.firebaseio.com/",
+  projectId: "vortex-ai-56177",
+  storageBucket: "vortex-ai-56177.firebasestorage.app",
+  messagingSenderId: "746045419077",
+  appId: "1:746045419077:web:250d5360ee6f493d77bd2c",
+  measurementId: "G-7E814PXDZZ"
+};
+
+let firebaseReady = false;
+let database = null, auth = null;
+try{
   firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-  const auth = firebase.auth();
-  
-  // ==================== GLOBAL VARIABLES ====================
-  let currentUser = null;
-  let currentChatId = null;
-  let currentChatMessages = [];
-  let allChats = [];
-  let selectedVoice = 'Jesse';
-  let isResponding = false;
-  let typingDiv = null;
-  let greetingMsg = document.getElementById('greetingMessage');
-  let firstMessageSent = false;
-  let pendingFile = null;
-  
-  // DOM Elements
-  const chatContainer = document.getElementById('chatContainer');
-  const userInput = document.getElementById('userInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const attachBtn = document.getElementById('attachBtn');
-  const fileInput = document.getElementById('fileInput');
-  const voiceBtn = document.getElementById('voiceBtn');
-  const generateImageBtn = document.getElementById('generateImageBtn');
-  const filePreviewArea = document.getElementById('filePreviewArea');
-  const splashScreen = document.getElementById('splashScreen');
-  const splashStatus = document.getElementById('splashStatus');
-  const appDiv = document.getElementById('app');
-  const statusBadge = document.getElementById('statusBadge');
-  const menuBtn = document.getElementById('menuBtn');
-  const sidebar = document.getElementById('sidebar');
-  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-  const newChatBtn = document.getElementById('newChatBtn');
-  const searchChatsInput = document.getElementById('searchChatsInput');
-  const chatsList = document.getElementById('chatsList');
-  const profileCard = document.getElementById('profileCard');
-  const profileModal = document.getElementById('profileModal');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-  const saveProfileBtn = document.getElementById('saveProfileBtn');
-  const userDisplayName = document.getElementById('userDisplayName');
-  const userPersonalInfo = document.getElementById('userPersonalInfo');
-  const profileName = document.getElementById('profileName');
-  const profileEmail = document.getElementById('profileEmail');
-  const exportModal = document.getElementById('exportModal');
-  
-  // ==================== VOICE SYSTEM WITH DIFFERENT PITCHES ====================
-  const voiceList = [
-    { name: 'Jesse', gender: 'male', pitch: 1.2, rate: 1.0, icon: 'fa-mars', description: 'Deep, authoritative male voice' },
-    { name: 'Fabian', gender: 'male', pitch: 1.0, rate: 1.1, icon: 'fa-mars', description: 'Warm, friendly male voice' },
-    { name: 'Joseph', gender: 'male', pitch: 0.85, rate: 0.95, icon: 'fa-mars', description: 'Calm, gentle male voice' },
-    { name: 'Roselyn', gender: 'female', pitch: 1.3, rate: 1.0, icon: 'fa-venus', description: 'Bright, energetic female voice' },
-    { name: 'Catherine', gender: 'female', pitch: 1.1, rate: 1.05, icon: 'fa-venus', description: 'Smooth, professional female voice' },
-    { name: 'Maria', gender: 'female', pitch: 0.95, rate: 0.9, icon: 'fa-venus', description: 'Soft, soothing female voice' }
-  ];
-  
-  function populateVoiceOptions() {
-    const container = document.getElementById('voiceOptionsList');
-    if (!container) return;
-    container.innerHTML = '';
-    voiceList.forEach(voice => {
-      const option = document.createElement('div');
-      option.className = `voice-option ${selectedVoice === voice.name ? 'selected' : ''}`;
-      option.innerHTML = `
-        <i class="fas ${voice.icon}" style="font-size: 1.2rem; color: ${voice.gender === 'male' ? '#3b82f6' : '#ec4899'}"></i>
-        <div style="flex:1;">
-          <div style="font-weight:600;">${voice.name}</div>
-          <div style="font-size:0.6rem; color:#94a3b8;">${voice.description}</div>
-        </div>
-        <button class="voice-sample" data-voice="${voice.name}"><i class="fas fa-play"></i></button>
-      `;
-      option.onclick = (e) => {
-        if (e.target.classList.contains('voice-sample')) return;
-        selectedVoice = voice.name;
-        document.querySelectorAll('.voice-option').forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        saveUserProfile();
-      };
-      const sampleBtn = option.querySelector('.voice-sample');
-      sampleBtn.onclick = (e) => {
-        e.stopPropagation();
-        sampleVoice(voice.name);
-      };
-      container.appendChild(option);
-    });
-  }
-  
-  function sampleVoice(voiceName) {
-    const voice = voiceList.find(v => v.name === voiceName);
-    if (voice) {
-      const utterance = new SpeechSynthesisUtterance(`Hello! This is ${voiceName}'s voice. How can I help you today?`);
-      utterance.pitch = voice.pitch;
-      utterance.rate = voice.rate;
-      const availableVoices = window.speechSynthesis.getVoices();
-      if (voice.gender === 'male') {
-        const maleVoice = availableVoices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Microsoft David'));
-        if (maleVoice) utterance.voice = maleVoice;
-      } else {
-        const femaleVoice = availableVoices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
-        if (femaleVoice) utterance.voice = femaleVoice;
-      }
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-  
-  function speakWithSelectedVoice(text) {
-    if (!text) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voicePref = voiceList.find(v => v.name === selectedVoice);
-    if (voicePref) {
-      utterance.pitch = voicePref.pitch;
-      utterance.rate = voicePref.rate;
-      const availableVoices = window.speechSynthesis.getVoices();
-      if (voicePref.gender === 'male') {
-        const maleVoice = availableVoices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Microsoft David'));
-        if (maleVoice) utterance.voice = maleVoice;
-      } else {
-        const femaleVoice = availableVoices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Microsoft Zira'));
-        if (femaleVoice) utterance.voice = femaleVoice;
+  database = firebase.database();
+  auth = firebase.auth();
+  firebaseReady = true;
+}catch(e){
+  console.warn('Firebase failed to initialize — running in local-only mode.', e);
+  firebaseReady = false;
+}
+
+/* ---------------------------------------------------------------------- *
+ * 2. STORE — cloud/local unified data layer.
+ *    Never lets the app hang: if cloud auth doesn't resolve within
+ *    STORE_TIMEOUT_MS, or Firebase isn't reachable at all, everything
+ *    transparently falls back to localStorage so the app always loads.
+ * ---------------------------------------------------------------------- */
+const STORE_TIMEOUT_MS = 5000;
+
+function genId(prefix){
+  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`;
+}
+function objectToArray(obj){
+  if(!obj) return [];
+  return Object.keys(obj).map(k => ({ id:k, ...obj[k] }));
+}
+
+const Store = {
+  mode: null, // 'cloud' | 'local'
+  uid: null,
+  _chatListeners: [],
+  _chatsRefBound: false,
+
+  async init(){
+    if(firebaseReady){
+      try{
+        const cred = await Promise.race([
+          auth.signInAnonymously(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('auth-timeout')), STORE_TIMEOUT_MS))
+        ]);
+        this.mode = 'cloud';
+        this.uid = cred.user.uid;
+        return this.mode;
+      }catch(e){
+        console.warn('Cloud auth unavailable, switching to local-only mode:', e.message);
       }
     }
-    window.speechSynthesis.speak(utterance);
-  }
-  
-  // ==================== AUTH & USER PROFILE (Firebase Realtime DB) ====================
-  function anonymousSignIn() {
-    splashStatus.textContent = 'Connecting to secure vault...';
-    
-    auth.signInAnonymously()
-      .then((userCredential) => {
-        currentUser = userCredential.user;
-        splashStatus.textContent = 'Loading your profile...';
-        loadUserProfile();
-      })
-      .catch((error) => {
-        console.error("Auth error:", error);
-        splashStatus.textContent = 'Retrying connection...';
-        setTimeout(anonymousSignIn, 2000);
-      });
-  }
-  
-  async function loadUserProfile() {
-    if (!currentUser) return;
-    
-    const userRef = database.ref(`users/${currentUser.uid}`);
-    userRef.once('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        userDisplayName.value = data.displayName || '';
-        userPersonalInfo.value = data.personalInfo || '';
-        selectedVoice = data.selectedVoice || 'Jesse';
-        profileName.textContent = data.displayName || 'Guest User';
-      } else {
-        selectedVoice = 'Jesse';
-        userRef.set({
-          displayName: '',
-          personalInfo: '',
-          selectedVoice: 'Jesse',
-          createdAt: Date.now()
-        });
-      }
-      profileEmail.textContent = currentUser.isAnonymous ? 'Guest User' : (currentUser.email || 'Anonymous');
-      profileName.textContent = userDisplayName.value || 'Guest User';
-      populateVoiceOptions();
-      loadAllChats();
-      
-      setTimeout(() => {
-        splashScreen.style.opacity = '0';
-        setTimeout(() => {
-          splashScreen.style.display = 'none';
-          appDiv.style.opacity = '1';
-          statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Online</span>';
-        }, 500);
-      }, 500);
-    });
-  }
-  
-  async function saveUserProfile() {
-    if (!currentUser) return;
-    
-    const userRef = database.ref(`users/${currentUser.uid}`);
-    await userRef.update({
-      displayName: userDisplayName.value,
-      personalInfo: userPersonalInfo.value,
-      selectedVoice: selectedVoice,
-      updatedAt: Date.now()
-    });
-    profileName.textContent = userDisplayName.value || 'Guest User';
-    showToast('Profile saved! I\'ll remember your preferences.', 'success');
-  }
-  
-  // ==================== CHAT MANAGEMENT (Firebase Realtime DB) ====================
-  async function createNewChat() {
-    if (!currentUser) return null;
-    
-    const newChatRef = database.ref(`chats/${currentUser.uid}`).push();
-    const chatId = newChatRef.key;
-    const newChat = {
-      id: chatId,
-      title: `New Chat ${new Date().toLocaleTimeString()}`,
-      pinned: false,
-      messageCount: 0,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    
-    await newChatRef.set(newChat);
-    currentChatId = chatId;
-    currentChatMessages = [];
-    clearChatDisplay();
-    addInitialGreeting();
-    await loadAllChats();
-    closeSidebar();
-    return chatId;
-  }
-  
-  async function loadAllChats() {
-    if (!currentUser) return;
-    
-    const chatsRef = database.ref(`chats/${currentUser.uid}`);
-    chatsRef.once('value', (snapshot) => {
-      const data = snapshot.val();
-      allChats = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          allChats.push({ id: key, ...data[key] });
-        });
-        allChats.sort((a, b) => {
-          if (a.pinned !== b.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
-          return (b.updatedAt || 0) - (a.updatedAt || 0);
-        });
-      }
-      renderChatsList();
-      
-      if (allChats.length === 0 && !currentChatId) {
-        createNewChat();
-      } else if (!currentChatId && allChats.length > 0) {
-        loadChat(allChats[0].id);
-      }
-    });
-  }
-  
-  function renderChatsList(searchTerm = '') {
-    let filteredChats = allChats;
-    if (searchTerm) {
-      filteredChats = allChats.filter(chat => 
-        chat.title && chat.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    this.mode = 'local';
+    let uid = localStorage.getItem('vortex_local_uid');
+    if(!uid){ uid = genId('local'); localStorage.setItem('vortex_local_uid', uid); }
+    this.uid = uid;
+    return this.mode;
+  },
+
+  _readLocal(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  },
+  _writeLocal(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){ console.warn('local write failed', e); }
+  },
+
+  async getProfile(){
+    if(this.mode === 'cloud'){
+      try{
+        const snap = await database.ref(`users/${this.uid}`).once('value');
+        return snap.val();
+      }catch(e){ console.warn('getProfile failed', e); return null; }
     }
-    
-    if (!filteredChats || filteredChats.length === 0) {
-      chatsList.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b;">No chats found</div>';
+    return this._readLocal(`vortex_profile_${this.uid}`, null);
+  },
+  async setProfile(data){
+    if(this.mode === 'cloud'){
+      try{ await database.ref(`users/${this.uid}`).update(data); }catch(e){ console.warn('setProfile failed', e); }
       return;
     }
-    
-    chatsList.innerHTML = filteredChats.map(chat => `
-      <div class="chat-item ${chat.pinned ? 'pinned' : ''}" data-chat-id="${chat.id}">
-        <div class="chat-title">
-          <span>${escapeHtml((chat.title || 'New Chat').substring(0, 30))}</span>
-          <div class="chat-actions">
-            <button class="chat-action-btn pin-btn ${chat.pinned ? 'pinned' : ''}" data-chat-id="${chat.id}" data-action="pin">
-              <i class="fas fa-thumbtack"></i>
-            </button>
-            <button class="chat-action-btn delete-chat-btn" data-chat-id="${chat.id}" data-action="delete">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-        <div class="chat-preview">
-          <span>${chat.messageCount || 0} messages</span>
-          <span class="chat-date">${formatDate(chat.updatedAt)}</span>
-        </div>
-      </div>
-    `).join('');
-    
-    document.querySelectorAll('.chat-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        if (e.target.closest('.chat-action-btn')) return;
-        loadChat(item.dataset.chatId);
-      });
-    });
-    
-    document.querySelectorAll('.pin-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await togglePinChat(btn.dataset.chatId);
-      });
-    });
-    
-    document.querySelectorAll('.delete-chat-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await deleteChat(btn.dataset.chatId);
-      });
-    });
-  }
-  
-  async function loadChat(chatId) {
-    if (!currentUser) return;
-    currentChatId = chatId;
-    
-    const messagesRef = database.ref(`messages/${currentUser.uid}/${chatId}`);
-    messagesRef.once('value', (snapshot) => {
-      const data = snapshot.val();
-      currentChatMessages = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          currentChatMessages.push({ id: key, ...data[key] });
-        });
-        currentChatMessages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-      }
-      
-      clearChatDisplay();
-      if (currentChatMessages.length === 0) {
-        addInitialGreeting();
-      } else {
-        displayMessages(currentChatMessages);
-      }
-      closeSidebar();
-    });
-  }
-  
-  async function saveMessage(role, content, imageUrl = null) {
-    if (!currentUser || !currentChatId) return null;
-    
-    const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}`).push();
-    const messageId = messageRef.key;
-    const message = {
-      id: messageId,
-      role: role,
-      content: content,
-      timestamp: Date.now()
-    };
-    if (imageUrl) message.imageUrl = imageUrl;
-    
-    await messageRef.set(message);
-    currentChatMessages.push(message);
-    
-    // Update chat message count and updated time
-    const chatRef = database.ref(`chats/${currentUser.uid}/${currentChatId}`);
-    await chatRef.update({
-      messageCount: currentChatMessages.length,
-      updatedAt: Date.now()
-    });
-    
-    // Update chat title if it's the first user message
-    if (role === 'user' && currentChatMessages.length === 1) {
-      const newTitle = content.substring(0, 40) + (content.length > 40 ? '...' : '');
-      await chatRef.update({ title: newTitle });
-      const chatIndex = allChats.findIndex(c => c.id === currentChatId);
-      if (chatIndex !== -1) allChats[chatIndex].title = newTitle;
-      renderChatsList();
-    }
-    
-    return messageId;
-  }
-  
-  async function togglePinChat(chatId) {
-    const chat = allChats.find(c => c.id === chatId);
-    if (chat) {
-      const newPinned = !chat.pinned;
-      const chatRef = database.ref(`chats/${currentUser.uid}/${chatId}`);
-      await chatRef.update({ pinned: newPinned });
-      chat.pinned = newPinned;
-      allChats.sort((a, b) => {
-        if (a.pinned !== b.pinned) return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
-        return (b.updatedAt || 0) - (a.updatedAt || 0);
-      });
-      renderChatsList();
-      showToast(newPinned ? 'Pinned' : 'Unpinned', 'success');
-    }
-  }
-  
-  async function deleteChat(chatId) {
-    if (!confirm('Delete this chat? This cannot be undone.')) return;
-    
-    // Delete all messages in this chat
-    const messagesRef = database.ref(`messages/${currentUser.uid}/${chatId}`);
-    await messagesRef.remove();
-    
-    // Delete the chat itself
-    const chatRef = database.ref(`chats/${currentUser.uid}/${chatId}`);
-    await chatRef.remove();
-    
-    allChats = allChats.filter(c => c.id !== chatId);
-    if (currentChatId === chatId) {
-      if (allChats.length > 0) {
-        await loadChat(allChats[0].id);
-      } else {
-        await createNewChat();
-      }
-    }
-    renderChatsList();
-    showToast('Chat deleted', 'info');
-  }
-  
-  // ==================== CROSS-CHAT MEMORY ====================
-  async function getRelevantMemories(query) {
-    if (!currentUser) return '';
-    
-    let memoryContext = '';
-    
-    // Get user personal info
-    const userRef = database.ref(`users/${currentUser.uid}`);
-    const userSnapshot = await userRef.once('value');
-    const userData = userSnapshot.val();
-    if (userData && userData.personalInfo) {
-      memoryContext += `[USER INFO: ${userData.personalInfo}]\n`;
-    }
-    if (userData && userData.displayName) {
-      memoryContext += `[USER NAME: ${userData.displayName}]\n`;
-    }
-    
-    // Get recent messages from last 3 chats for context
-    const chatsRef = database.ref(`chats/${currentUser.uid}`);
-    const chatsSnapshot = await chatsRef.once('value');
-    const chats = chatsSnapshot.val();
-    
-    if (chats) {
-      const chatList = Object.keys(chats).map(key => ({ id: key, ...chats[key] }));
-      chatList.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      const recentChats = chatList.slice(0, 3);
-      
-      for (const chat of recentChats) {
-        if (chat.id !== currentChatId) {
-          const messagesRef = database.ref(`messages/${currentUser.uid}/${chat.id}`);
-          const messagesSnapshot = await messagesRef.once('value');
-          const messages = messagesSnapshot.val();
-          if (messages) {
-            const messageList = Object.keys(messages).map(key => ({ ...messages[key] }));
-            messageList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            const recentMessages = messageList.slice(0, 3);
-            recentMessages.forEach(msg => {
-              memoryContext += `[Previous conversation "${chat.title || 'Chat'}": ${msg.role} said: ${msg.content.substring(0, 200)}]\n`;
-            });
-          }
-        }
-      }
-    }
-    
-    // Also include current chat history for continuity
-    if (currentChatMessages.length > 0) {
-      const recentCurrent = currentChatMessages.slice(-5);
-      recentCurrent.forEach(msg => {
-        memoryContext += `[In this chat: ${msg.role} said: ${msg.content.substring(0, 200)}]\n`;
-      });
-    }
-    
-    return memoryContext;
-  }
-  
-  // ==================== DISPLAY FUNCTIONS ====================
-  function clearChatDisplay() {
-    chatContainer.innerHTML = '';
-    firstMessageSent = false;
-  }
-  
-  function addInitialGreeting() {
-    const greetingDiv = document.createElement('div');
-    greetingDiv.className = 'message bot';
-    greetingDiv.innerHTML = `
-      <div class="avatar"><i class="fas fa-brain"></i></div>
-      <div class="bubble">
-        <div class="message-text">✨ Welcome back! I remember our conversations. Ask me anything!</div>
-      </div>
-    `;
-    chatContainer.appendChild(greetingDiv);
-    scrollToBottom();
-  }
-  
-  function displayMessages(messages) {
-    messages.forEach(msg => {
-      if (msg.role === 'user') {
-        displayUserMessage(msg.content, msg.imageUrl, msg.id);
-      } else {
-        displayBotMessage(msg.content, msg.id);
-      }
-    });
-    scrollToBottom();
-  }
-  
-  function displayUserMessage(text, imageUrl, messageId) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message user';
-    msgDiv.dataset.messageId = messageId;
-    msgDiv.innerHTML = `
-      <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
-      <div class="bubble">
-        <div class="message-text">${escapeHtml(text)}</div>
-        <button class="edit-message-btn" onclick="editExistingMessage('${messageId}', this)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
-        <button class="delete-message-btn" onclick="deleteExistingMessage('${messageId}', this)" title="Delete"><i class="fas fa-trash"></i></button>
-        ${imageUrl ? `<br><img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">` : ''}
-      </div>
-    `;
-    chatContainer.appendChild(msgDiv);
-  }
-  
-  function displayBotMessage(text, messageId) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message bot';
-    msgDiv.dataset.messageId = messageId;
-    const formattedText = formatCodeBlocks(escapeHtml(text));
-    msgDiv.innerHTML = `
-      <div class="avatar"><i class="fas fa-robot"></i></div>
-      <div class="bubble">
-        <div class="message-text">${formattedText}</div>
-        <div class="message-actions">
-          <button class="action-icon copy-msg"><i class="fas fa-copy"></i> Copy</button>
-          <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
-        </div>
-      </div>
-    `;
-    chatContainer.appendChild(msgDiv);
-    
-    msgDiv.querySelector('.copy-msg').onclick = () => {
-      navigator.clipboard.writeText(text);
-      showToast('Copied!', 'success');
-    };
-    msgDiv.querySelector('.speak-msg').onclick = () => speakWithSelectedVoice(text);
-    hljs.highlightAll();
-  }
-  
-  window.editExistingMessage = async function(messageId, btn) {
-    const msgDiv = btn.closest('.message');
-    const textDiv = msgDiv.querySelector('.message-text');
-    const oldText = textDiv.innerText;
-    const newText = prompt('Edit your message:', oldText);
-    if (newText && newText !== oldText) {
-      const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}/${messageId}`);
-      await messageRef.update({ content: newText, edited: true });
-      
-      const msgIndex = currentChatMessages.findIndex(m => m.id === messageId);
-      if (msgIndex !== -1) currentChatMessages[msgIndex].content = newText;
-      textDiv.innerHTML = escapeHtml(newText);
-      showToast('Message updated', 'success');
-    }
-  };
-  
-  window.deleteExistingMessage = async function(messageId, btn) {
-    if (confirm('Delete this message?')) {
-      const messageRef = database.ref(`messages/${currentUser.uid}/${currentChatId}/${messageId}`);
-      await messageRef.remove();
-      
-      const msgIndex = currentChatMessages.findIndex(m => m.id === messageId);
-      if (msgIndex !== -1) currentChatMessages.splice(msgIndex, 1);
-      btn.closest('.message').remove();
-      
-      // Update chat message count
-      const chatRef = database.ref(`chats/${currentUser.uid}/${currentChatId}`);
-      await chatRef.update({ messageCount: currentChatMessages.length });
-      
-      showToast('Message deleted', 'info');
-    }
-  };
-  
-  // ==================== API COMMUNICATION ====================
-  async function callVortexAPI(prompt, fileBase64 = null, mimeType = 'image/jpeg', memoryContext = '') {
-    try {
-      statusBadge.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> <span>Thinking...</span>';
-      
-      let fullPrompt = prompt;
-      if (memoryContext && memoryContext.trim()) {
-        fullPrompt = `IMPORTANT CONTEXT FROM OUR PREVIOUS CONVERSATIONS (USE THIS TO PERSONALIZE YOUR RESPONSE):
-${memoryContext}
+    const existing = this._readLocal(`vortex_profile_${this.uid}`, {}) || {};
+    this._writeLocal(`vortex_profile_${this.uid}`, { ...existing, ...data });
+  },
 
-CURRENT QUESTION FROM USER: ${prompt}
+  watchChats(cb){
+    this._chatListeners.push(cb);
+    if(this.mode === 'cloud'){
+      if(!this._chatsRefBound){
+        this._chatsRefBound = true;
+        database.ref(`chats/${this.uid}`).on('value', snap => {
+          const chats = objectToArray(snap.val());
+          this._chatListeners.forEach(fn => fn(chats));
+        }, err => console.warn('chats listener error', err));
+      }
+    } else {
+      this._emitChatsLocal();
+    }
+  },
+  _emitChatsLocal(){
+    const chats = this._readLocal(`vortex_chats_${this.uid}`, []);
+    this._chatListeners.forEach(fn => fn(chats));
+  },
 
-Please use the context above to provide a helpful, personalized response. Remember what the user told you about themselves.`;
-      }
-      
-      if (userDisplayName.value && userDisplayName.value.trim()) {
-        fullPrompt = `The user's name is ${userDisplayName.value}. ` + fullPrompt;
-      }
-      
-      const requestBody = {
-        message: fullPrompt,
-        image: fileBase64 ? { data: fileBase64, mimeType: mimeType } : null
-      };
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
-      
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #10b981;"></i> <span>Online</span>';
-        return data.choices[0].message.content;
-      }
-      
-      return "I'm here to help! What would you like to know?";
-      
-    } catch (error) {
-      console.error("API Error:", error);
-      statusBadge.innerHTML = '<i class="fas fa-circle" style="font-size: 0.4rem; color: #ef4444;"></i> <span>Error</span>';
-      return `I'm having trouble connecting. Please try again. Error: ${error.message}`;
+  async createChat(){
+    const chat = { title:'New chat', pinned:false, messageCount:0, createdAt:Date.now(), updatedAt:Date.now() };
+    if(this.mode === 'cloud'){
+      const ref = database.ref(`chats/${this.uid}`).push();
+      chat.id = ref.key;
+      await ref.set(chat);
+    } else {
+      chat.id = genId('c');
+      const chats = this._readLocal(`vortex_chats_${this.uid}`, []);
+      chats.push(chat);
+      this._writeLocal(`vortex_chats_${this.uid}`, chats);
+      this._emitChatsLocal();
+    }
+    return chat.id;
+  },
+  async updateChat(chatId, patch){
+    if(this.mode === 'cloud'){
+      try{ await database.ref(`chats/${this.uid}/${chatId}`).update(patch); }catch(e){ console.warn(e); }
+    } else {
+      const chats = this._readLocal(`vortex_chats_${this.uid}`, []);
+      const idx = chats.findIndex(c => c.id === chatId);
+      if(idx !== -1) chats[idx] = { ...chats[idx], ...patch };
+      this._writeLocal(`vortex_chats_${this.uid}`, chats);
+      this._emitChatsLocal();
+    }
+  },
+  async deleteChat(chatId){
+    if(this.mode === 'cloud'){
+      try{
+        await database.ref(`messages/${this.uid}/${chatId}`).remove();
+        await database.ref(`chats/${this.uid}/${chatId}`).remove();
+      }catch(e){ console.warn(e); }
+    } else {
+      let chats = this._readLocal(`vortex_chats_${this.uid}`, []);
+      chats = chats.filter(c => c.id !== chatId);
+      this._writeLocal(`vortex_chats_${this.uid}`, chats);
+      localStorage.removeItem(`vortex_msgs_${this.uid}_${chatId}`);
+      this._emitChatsLocal();
+    }
+  },
+
+  async listMessages(chatId){
+    if(this.mode === 'cloud'){
+      try{
+        const snap = await database.ref(`messages/${this.uid}/${chatId}`).once('value');
+        const msgs = objectToArray(snap.val());
+        msgs.sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+        return msgs;
+      }catch(e){ console.warn(e); return []; }
+    }
+    const msgs = this._readLocal(`vortex_msgs_${this.uid}_${chatId}`, []);
+    msgs.sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+    return msgs;
+  },
+  async addMessage(chatId, msg){
+    if(this.mode === 'cloud'){
+      const ref = database.ref(`messages/${this.uid}/${chatId}`).push();
+      msg.id = ref.key;
+      await ref.set(msg);
+    } else {
+      msg.id = genId('m');
+      const msgs = this._readLocal(`vortex_msgs_${this.uid}_${chatId}`, []);
+      msgs.push(msg);
+      this._writeLocal(`vortex_msgs_${this.uid}_${chatId}`, msgs);
+    }
+    return msg.id;
+  },
+  async updateMessage(chatId, msgId, patch){
+    if(this.mode === 'cloud'){
+      try{ await database.ref(`messages/${this.uid}/${chatId}/${msgId}`).update(patch); }catch(e){ console.warn(e); }
+    } else {
+      const msgs = this._readLocal(`vortex_msgs_${this.uid}_${chatId}`, []);
+      const idx = msgs.findIndex(m => m.id === msgId);
+      if(idx !== -1) msgs[idx] = { ...msgs[idx], ...patch };
+      this._writeLocal(`vortex_msgs_${this.uid}_${chatId}`, msgs);
+    }
+  },
+  async deleteMessage(chatId, msgId){
+    if(this.mode === 'cloud'){
+      try{ await database.ref(`messages/${this.uid}/${chatId}/${msgId}`).remove(); }catch(e){ console.warn(e); }
+    } else {
+      let msgs = this._readLocal(`vortex_msgs_${this.uid}_${chatId}`, []);
+      msgs = msgs.filter(m => m.id !== msgId);
+      this._writeLocal(`vortex_msgs_${this.uid}_${chatId}`, msgs);
+    }
+  },
+
+  async wipeEverything(){
+    if(this.mode === 'cloud'){
+      try{
+        await database.ref(`chats/${this.uid}`).remove();
+        await database.ref(`messages/${this.uid}`).remove();
+        await database.ref(`users/${this.uid}`).remove();
+      }catch(e){ console.warn(e); }
+    } else {
+      Object.keys(localStorage).filter(k => k.includes(this.uid)).forEach(k => localStorage.removeItem(k));
     }
   }
-  
-  async function sendMessage(userText, retryFile = null) {
-    if (isResponding) {
-      showToast("Please wait for the current response to finish", "info");
-      return;
-    }
-    
-    const text = userText || userInput.value.trim();
-    if (!text && !pendingFile && !retryFile) return;
-    
-    if (greetingMsg && !firstMessageSent) {
-      greetingMsg.style.display = 'none';
-      firstMessageSent = true;
-    }
-    
-    if (!currentChatId) {
+};
+
+/* ---------------------------------------------------------------------- *
+ * 3. CONSTANTS
+ * ---------------------------------------------------------------------- */
+const MODELS = [
+  { id:'vortex-nova',   name:'Vortex Nova',   desc:'Fast and balanced — best for everyday chat', icon:'fa-bolt' },
+  { id:'vortex-apex',   name:'Vortex Apex',   desc:'Deeper reasoning for complex problems', icon:'fa-brain' },
+  { id:'vortex-vision', name:'Vortex Vision', desc:'Optimized for images, PDFs and documents', icon:'fa-eye' },
+  { id:'vortex-flash',  name:'Vortex Flash',  desc:'Lightweight and near-instant replies', icon:'fa-feather' }
+];
+
+const CODE_EXT = {
+  javascript:'js', js:'js', typescript:'ts', ts:'ts', jsx:'jsx', tsx:'tsx',
+  python:'py', py:'py', html:'html', css:'css', json:'json',
+  bash:'sh', sh:'sh', shell:'sh', java:'java', c:'c', cpp:'cpp', 'c++':'cpp',
+  csharp:'cs', 'c#':'cs', php:'php', ruby:'rb', rb:'rb', go:'go', golang:'go',
+  rust:'rs', rs:'rs', sql:'sql', yaml:'yml', yml:'yml', markdown:'md', md:'md',
+  kotlin:'kt', swift:'swift', dart:'dart', xml:'xml', plaintext:'txt', text:'txt'
+};
+
+const IMAGE_STYLES = ['Realistic', 'Anime', '3D render', 'Watercolor', 'Cyberpunk', 'Minimalist'];
+
+// Full founder bio — only surfaced by the model when the user asks a precise,
+// direct question about who made Vortex AI. Casual chats never get this dumped on them.
+const VORTEX_IDENTITY = `You are Vortex AI, a helpful, direct, and knowledgeable AI assistant.
+
+Identity rules:
+- You are "Vortex AI", built by Vortex Technologies Unlimited.
+- Vortex Technologies Unlimited was founded by Egwuatu Ogochukwu Jesse (born 22nd November 2005), son of Mr. Joseph and Mrs. Roselyn Egwuatu, from Illah (Ogbe Onaje), Oshimili North LGA, Delta State, Nigeria.
+- Only share these identity/founder details when the user directly and specifically asks who made you, who owns you, or about your company/founder. Do not volunteer this unprompted, and do not repeat the full biography more than once unless asked again.
+- Never claim to be made by OpenAI, Google, Anthropic, or any other company.
+
+Behavior:
+- Be genuinely useful: give direct, complete answers first, then add context if it helps.
+- Match the user's tone — casual with casual, precise and technical with technical questions.
+- When you write code, always put it in a fenced code block with the correct language tag so it renders properly.
+- When personal context about the user is provided to you (their name, stated preferences, past conversations), use it naturally to personalize your answer — don't just acknowledge it, actually tailor your response to it.
+- Ask a clarifying question only when it's truly necessary; otherwise make a reasonable assumption and proceed.
+- Be honest about uncertainty instead of making things up.`;
+
+/* ---------------------------------------------------------------------- *
+ * 4. DOM REFERENCES
+ * ---------------------------------------------------------------------- */
+const chatContainer = document.getElementById('chatContainer');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const attachBtn = document.getElementById('attachBtn');
+const fileInput = document.getElementById('fileInput');
+const generateImageBtn = document.getElementById('generateImageBtn');
+const filePreviewArea = document.getElementById('filePreviewArea');
+const inputWrapper = document.getElementById('inputWrapper');
+const splashScreen = document.getElementById('splashScreen');
+const splashStatus = document.getElementById('splashStatus');
+const splashRetryBtn = document.getElementById('splashRetryBtn');
+const appDiv = document.getElementById('app');
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const sidebarScrim = document.getElementById('sidebarScrim');
+const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+const newChatBtn = document.getElementById('newChatBtn');
+const searchChatsInput = document.getElementById('searchChatsInput');
+const chatsList = document.getElementById('chatsList');
+const profileCard = document.getElementById('profileCard');
+const profileModal = document.getElementById('profileModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const saveProfileBtn = document.getElementById('saveProfileBtn');
+const userDisplayName = document.getElementById('userDisplayName');
+const userPersonalInfo = document.getElementById('userPersonalInfo');
+const autoSpeakToggle = document.getElementById('autoSpeakToggle');
+const responseStyleRow = document.getElementById('responseStyleRow');
+const creativitySlider = document.getElementById('creativitySlider');
+const creativityValue = document.getElementById('creativityValue');
+const profileName = document.getElementById('profileName');
+const profileEmail = document.getElementById('profileEmail');
+const exportModal = document.getElementById('exportModal');
+const aboutModal = document.getElementById('aboutModal');
+const modelPill = document.getElementById('modelPill');
+const modelPillLabel = document.getElementById('modelPillLabel');
+const modelDropdown = document.getElementById('modelDropdown');
+const muteBtn = document.getElementById('muteBtn');
+const voiceModeBtn = document.getElementById('voiceModeBtn');
+const voiceOverlay = document.getElementById('voiceOverlay');
+const voiceOrb = document.getElementById('voiceOrb');
+const voiceOrbCore = document.getElementById('voiceOrbCore');
+const voiceStatusText = document.getElementById('voiceStatusText');
+const voiceTranscript = document.getElementById('voiceTranscript');
+const voiceMuteBtn = document.getElementById('voiceMuteBtn');
+const voiceExitBtn = document.getElementById('voiceExitBtn');
+const voiceModelNote = document.getElementById('voiceModelNote');
+const storageBadge = document.getElementById('storageBadge');
+const dataStatusText = document.getElementById('dataStatusText');
+const clearDataBtn = document.getElementById('clearDataBtn');
+const toastStack = document.getElementById('toastStack');
+
+/* ---------------------------------------------------------------------- *
+ * GLOBAL STATE
+ * ---------------------------------------------------------------------- */
+let currentChatId = null;
+let currentChatMessages = [];
+let allChats = [];
+let selectedVoice = 'Jesse';
+let selectedModel = 'vortex-nova';
+let responseStyle = 'balanced';
+let creativity = 50;
+let autoSpeak = false;
+let isMuted = false;
+let isResponding = false;
+let typingDiv = null;
+let pendingFile = null;
+let voiceModeActive = false;
+let voiceModeMicMuted = false;
+let recognizer = null;
+let currentAbortController = null;
+let splashHidden = false;
+
+function prefersReducedMotion(){
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* ---------------------------------------------------------------------- *
+ * 5. VOICE SYNTHESIS
+ * ---------------------------------------------------------------------- */
+const voiceList = [
+  { name:'Jesse',     gender:'male',   pitch:1.2,  rate:1.0,  icon:'fa-mars',  description:'Deep, authoritative' },
+  { name:'Fabian',    gender:'male',   pitch:1.0,  rate:1.05, icon:'fa-mars',  description:'Warm and friendly' },
+  { name:'Joseph',    gender:'male',   pitch:0.85, rate:0.95, icon:'fa-mars',  description:'Calm and gentle' },
+  { name:'Roselyn',   gender:'female', pitch:1.3,  rate:1.0,  icon:'fa-venus', description:'Bright and energetic' },
+  { name:'Catherine', gender:'female', pitch:1.1,  rate:1.05, icon:'fa-venus', description:'Smooth and professional' },
+  { name:'Maria',     gender:'female', pitch:0.95, rate:0.9,  icon:'fa-venus', description:'Soft and soothing' }
+];
+
+function populateVoiceOptions(){
+  const container = document.getElementById('voiceOptionsList');
+  if(!container) return;
+  container.innerHTML = '';
+  voiceList.forEach(voice => {
+    const option = document.createElement('div');
+    option.className = `voice-option ${selectedVoice === voice.name ? 'selected' : ''}`;
+    option.innerHTML = `
+      <i class="fas ${voice.icon}" style="font-size:1.1rem;color:${voice.gender==='male' ? '#20e3ff' : '#ff8ec6'}"></i>
+      <div style="flex:1;"><div style="font-weight:600;font-size:.82rem;">${voice.name}</div><div style="font-size:.66rem;color:var(--text-faint);">${voice.description}</div></div>
+      <button class="voice-sample" data-voice="${voice.name}" title="Preview"><i class="fas fa-play"></i></button>`;
+    option.onclick = (e) => {
+      if(e.target.closest('.voice-sample')) return;
+      selectedVoice = voice.name;
+      document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+    };
+    option.querySelector('.voice-sample').onclick = (e) => { e.stopPropagation(); sampleVoice(voice.name); };
+    container.appendChild(option);
+  });
+}
+
+function pickSystemVoice(genderPref){
+  if(!window.speechSynthesis) return null;
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices.length) return null;
+  const englishVoices = voices.filter(v => v.lang && v.lang.startsWith('en'));
+  const pool = englishVoices.length ? englishVoices : voices;
+  const nameMatch = pool.find(v => genderPref === 'male'
+    ? /male|david|mark|guy|daniel/i.test(v.name)
+    : /female|zira|susan|samantha|victoria|karen/i.test(v.name));
+  return nameMatch || pool[0];
+}
+
+function sampleVoice(voiceName){
+  if(!window.speechSynthesis) return;
+  const voice = voiceList.find(v => v.name === voiceName);
+  if(!voice) return;
+  const utterance = new SpeechSynthesisUtterance(`Hi, I'm ${voiceName}. This is how I sound.`);
+  utterance.pitch = voice.pitch; utterance.rate = voice.rate;
+  const sysVoice = pickSystemVoice(voice.gender);
+  if(sysVoice) utterance.voice = sysVoice;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeaking(){ if(window.speechSynthesis) window.speechSynthesis.cancel(); }
+
+function speakText(text, onEnd){
+  if(!text || isMuted || !window.speechSynthesis){ if(onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const clean = text.replace(/```[\s\S]*?```/g, ' Here is a code block, shown on screen. ').replace(/[#*_`>[\]()]/g,'');
+  const utterance = new SpeechSynthesisUtterance(clean);
+  const voicePref = voiceList.find(v => v.name === selectedVoice);
+  if(voicePref){
+    utterance.pitch = voicePref.pitch; utterance.rate = voicePref.rate;
+    const sysVoice = pickSystemVoice(voicePref.gender);
+    if(sysVoice) utterance.voice = sysVoice;
+  }
+  if(onEnd){ utterance.onend = onEnd; utterance.onerror = onEnd; }
+  window.speechSynthesis.speak(utterance);
+}
+
+/* ---------------------------------------------------------------------- *
+ * 6. MODEL DROPDOWN
+ * ---------------------------------------------------------------------- */
+function renderModelDropdown(){
+  modelDropdown.innerHTML = MODELS.map(m => `
+    <div class="model-opt ${m.id===selectedModel?'selected':''}" data-model="${m.id}">
+      <div class="model-opt-name"><i class="fas ${m.icon}" style="color:var(--cyan);font-size:.75rem;"></i>${m.name}</div>
+      <div class="model-opt-desc">${m.desc}</div>
+    </div>`).join('') + `<div class="model-dropdown-divider"></div><div class="model-dropdown-footer">Model routing is finalized in your backend (api/chat.js).</div>`;
+  modelDropdown.querySelectorAll('.model-opt').forEach(el => {
+    el.onclick = () => {
+      selectedModel = el.dataset.model;
+      const m = MODELS.find(x => x.id === selectedModel);
+      modelPillLabel.textContent = m.name;
+      voiceModelNote.textContent = m.name;
+      renderModelDropdown();
+      modelDropdown.classList.remove('open');
+      modelPill.classList.remove('open');
+      Store.setProfile({ selectedModel });
+    };
+  });
+}
+modelPill.addEventListener('click', () => {
+  modelDropdown.classList.toggle('open');
+  modelPill.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if(!modelPill.contains(e.target) && !modelDropdown.contains(e.target)){
+    modelDropdown.classList.remove('open'); modelPill.classList.remove('open');
+  }
+});
+
+/* ---------------------------------------------------------------------- *
+ * 7. PROFILE / SETTINGS
+ * ---------------------------------------------------------------------- */
+function buildSystemPrompt(){
+  let prompt = VORTEX_IDENTITY;
+  const name = userDisplayName.value && userDisplayName.value.trim();
+  const info = userPersonalInfo.value && userPersonalInfo.value.trim();
+  if(name || info){
+    prompt += `\n\nWhat you know about the person you're talking to:`;
+    if(name) prompt += `\n- Their name is ${name}. Address them by it naturally, not in every message.`;
+    if(info) prompt += `\n- They told you this about themselves: "${info}". Use it to personalize your answers where relevant.`;
+  }
+  const styleMap = {
+    concise: 'Keep replies short and to the point unless the user explicitly asks for more depth.',
+    balanced: 'Give complete, well-organized answers without unnecessary padding.',
+    detailed: 'Be thorough — explain reasoning, add relevant context, and anticipate follow-up questions.'
+  };
+  prompt += `\n\nReply length preference: ${styleMap[responseStyle] || styleMap.balanced}`;
+  return prompt;
+}
+
+function setResponseStyleUI(style){
+  responseStyle = style;
+  responseStyleRow.querySelectorAll('button').forEach(b => b.classList.toggle('selected', b.dataset.style === style));
+}
+responseStyleRow.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => setResponseStyleUI(btn.dataset.style));
+});
+creativitySlider.addEventListener('input', () => {
+  creativity = parseInt(creativitySlider.value, 10);
+  creativityValue.textContent = creativity + '%';
+});
+
+function updateStorageBadge(){
+  if(Store.mode === 'cloud'){
+    storageBadge.className = 'storage-badge cloud';
+    storageBadge.innerHTML = '<i class="fas fa-cloud"></i> Synced';
+    dataStatusText.textContent = 'Your chats are backed up to your Vortex account and sync across devices.';
+  } else {
+    storageBadge.className = 'storage-badge local';
+    storageBadge.innerHTML = '<i class="fas fa-laptop"></i> Local only';
+    dataStatusText.textContent = 'Cloud sync is unavailable right now, so chats are being saved on this device only, in this browser.';
+  }
+}
+
+async function loadProfileIntoUI(){
+  const data = await Store.getProfile();
+  if(data){
+    userDisplayName.value = data.displayName || '';
+    userPersonalInfo.value = data.personalInfo || '';
+    selectedVoice = data.selectedVoice || 'Jesse';
+    selectedModel = data.selectedModel || 'vortex-nova';
+    autoSpeak = !!data.autoSpeak;
+    responseStyle = data.responseStyle || 'balanced';
+    creativity = typeof data.creativity === 'number' ? data.creativity : 50;
+  } else {
+    await Store.setProfile({
+      displayName:'', personalInfo:'', selectedVoice:'Jesse', selectedModel:'vortex-nova',
+      autoSpeak:false, responseStyle:'balanced', creativity:50, createdAt:Date.now()
+    });
+  }
+  autoSpeakToggle.checked = autoSpeak;
+  setResponseStyleUI(responseStyle);
+  creativitySlider.value = creativity;
+  creativityValue.textContent = creativity + '%';
+  const m = MODELS.find(x => x.id === selectedModel) || MODELS[0];
+  modelPillLabel.textContent = m.name;
+  voiceModelNote.textContent = m.name;
+  profileEmail.textContent = Store.mode === 'cloud' ? 'Synced account' : 'Local session';
+  profileName.textContent = userDisplayName.value || 'Guest';
+  populateVoiceOptions();
+  renderModelDropdown();
+  updateStorageBadge();
+}
+
+async function saveUserProfile(silent){
+  autoSpeak = autoSpeakToggle.checked;
+  await Store.setProfile({
+    displayName: userDisplayName.value, personalInfo: userPersonalInfo.value,
+    selectedVoice, selectedModel, autoSpeak, responseStyle, creativity, updatedAt: Date.now()
+  });
+  profileName.textContent = userDisplayName.value || 'Guest';
+  if(!silent) showToast('Settings saved', 'success');
+}
+
+clearDataBtn.addEventListener('click', async () => {
+  if(!confirm('This permanently deletes every chat and setting. This cannot be undone. Continue?')) return;
+  await Store.wipeEverything();
+  showToast('All data cleared', 'info');
+  setTimeout(() => location.reload(), 700);
+});
+
+/* ---------------------------------------------------------------------- *
+ * 8. CHAT LIST + CHAT CRUD
+ * ---------------------------------------------------------------------- */
+async function createNewChat(){
+  const chatId = await Store.createChat();
+  currentChatId = chatId;
+  currentChatMessages = [];
+  clearChatDisplay();
+  showWelcomeScreen();
+  closeSidebar();
+  return chatId;
+}
+
+function onChatsUpdated(chats){
+  allChats = chats.slice().sort((a,b) => {
+    if(a.pinned !== b.pinned) return (b.pinned?1:0) - (a.pinned?1:0);
+    return (b.updatedAt||0) - (a.updatedAt||0);
+  });
+  renderChatsList(searchChatsInput.value);
+  if(allChats.length === 0 && !currentChatId){
+    createNewChat();
+  } else if(!currentChatId && allChats.length > 0){
+    loadChat(allChats[0].id);
+  }
+}
+
+function renderChatsList(searchTerm=''){
+  let filtered = allChats;
+  if(searchTerm) filtered = allChats.filter(c => (c.title||'').toLowerCase().includes(searchTerm.toLowerCase()));
+  if(!filtered.length){
+    chatsList.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-faint);font-size:.8rem;">${searchTerm ? 'No chats found' : 'No chats yet'}</div>`;
+    return;
+  }
+  chatsList.innerHTML = filtered.map(chat => `
+    <div class="chat-item ${chat.pinned?'pinned':''} ${chat.id===currentChatId?'active':''}" data-chat-id="${chat.id}">
+      <div class="chat-title">${escapeHtml((chat.title||'New chat'))}</div>
+      <div class="chat-preview"><span>${chat.messageCount||0} messages</span><span>${formatDate(chat.updatedAt)}</span></div>
+      <div class="chat-actions">
+        <button class="chat-action-btn pin-btn ${chat.pinned?'pinned':''}" data-chat-id="${chat.id}" title="Pin"><i class="fas fa-thumbtack"></i></button>
+        <button class="chat-action-btn delete-chat-btn" data-chat-id="${chat.id}" title="Delete"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+  chatsList.querySelectorAll('.chat-item').forEach(item => item.addEventListener('click', (e) => {
+    if(e.target.closest('.chat-action-btn')) return;
+    loadChat(item.dataset.chatId);
+  }));
+  chatsList.querySelectorAll('.pin-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); togglePinChat(btn.dataset.chatId); }));
+  chatsList.querySelectorAll('.delete-chat-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); deleteChatConfirm(btn.dataset.chatId); }));
+}
+
+async function loadChat(chatId){
+  currentChatId = chatId;
+  stopSpeaking();
+  currentChatMessages = await Store.listMessages(chatId);
+  clearChatDisplay();
+  if(currentChatMessages.length === 0) showWelcomeScreen();
+  else displayMessages(currentChatMessages);
+  renderChatsList(searchChatsInput.value);
+  closeSidebar();
+}
+
+async function saveMessage(role, content, imageUrl=null){
+  if(!currentChatId) return null;
+  const message = { role, content, timestamp:Date.now() };
+  if(imageUrl) message.imageUrl = imageUrl;
+  const messageId = await Store.addMessage(currentChatId, message);
+  message.id = messageId;
+  currentChatMessages.push(message);
+  const patch = { messageCount: currentChatMessages.length, updatedAt: Date.now() };
+  if(role === 'user' && currentChatMessages.filter(m => m.role === 'user').length === 1){
+    patch.title = content.substring(0,42) + (content.length > 42 ? '…' : '');
+  }
+  await Store.updateChat(currentChatId, patch);
+  return messageId;
+}
+
+async function togglePinChat(chatId){
+  const chat = allChats.find(c => c.id === chatId);
+  if(!chat) return;
+  await Store.updateChat(chatId, { pinned: !chat.pinned });
+  showToast(!chat.pinned ? 'Pinned' : 'Unpinned', 'success');
+}
+
+async function deleteChatConfirm(chatId){
+  if(!confirm('Delete this chat? This cannot be undone.')) return;
+  await Store.deleteChat(chatId);
+  if(currentChatId === chatId){
+    currentChatId = null;
+    if(allChats.length > 1){
+      const next = allChats.find(c => c.id !== chatId);
+      if(next) loadChat(next.id); else await createNewChat();
+    } else {
       await createNewChat();
     }
-    
-    const fileToSend = retryFile || pendingFile;
-    const userImageUrl = fileToSend ? `data:${fileToSend.mime};base64,${fileToSend.base64}` : null;
-    
-    // Save and display user message
-    await saveMessage('user', text || "Analyzing attachment", userImageUrl);
-    displayUserMessage(text || "Analyzing attachment", userImageUrl);
-    
-    userInput.value = '';
-    pendingFile = null;
-    filePreviewArea.innerHTML = '';
-    
-    // Get memory context for AI
-    const memoryContext = await getRelevantMemories(text);
-    
-    showTypingIndicator();
-    isResponding = true;
-    
-    const response = await callVortexAPI(text || "Describe this attachment", fileToSend?.base64, fileToSend?.mime, memoryContext);
-    
-    hideTypingIndicator();
-    isResponding = false;
-    
-    // Save and display AI response
-    await saveMessage('assistant', response);
-    displayBotMessage(response);
-    
-    scrollToBottom();
-    speakWithSelectedVoice(response);
   }
-  
-  // ==================== UTILITY FUNCTIONS ====================
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')).replace(/\n/g, '<br>');
+  showToast('Chat deleted', 'info');
+}
+
+/* ---------------------------------------------------------------------- *
+ * 9. CROSS-CHAT MEMORY
+ * ---------------------------------------------------------------------- */
+async function getRelevantMemories(){
+  let ctx = '';
+  const otherChats = allChats.filter(c => c.id !== currentChatId).slice(0, 3);
+  for(const chat of otherChats){
+    const msgs = await Store.listMessages(chat.id);
+    msgs.slice(-3).forEach(m => { ctx += `[Earlier, in "${chat.title||'a chat'}", ${m.role} said: ${(m.content||'').substring(0,200)}]\n`; });
   }
-  
-  function formatCodeBlocks(text) {
-    const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-    return text.replace(codeBlockRegex, (match, lang, code) => {
-      const escapedCode = escapeHtml(code.trim());
-      return `<div class="code-block">
-        <div class="code-header">
-          <span>${lang || 'code'}</span>
-          <button class="copy-code-btn" onclick="window.copyCode(this, \`${escapedCode.replace(/`/g, '\\`')}\`)"><i class="fas fa-copy"></i> Copy</button>
-        </div>
-        <pre><code class="language-${lang || 'plaintext'}">${escapedCode}</code></pre>
-      </div>`;
-    });
+  if(currentChatMessages.length > 0){
+    currentChatMessages.slice(-6).forEach(m => { ctx += `[${m.role}: ${(m.content||'').substring(0,300)}]\n`; });
   }
-  
-  window.copyCode = function(btn, code) {
-    navigator.clipboard.writeText(code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
-    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+  return ctx;
+}
+
+/* ---------------------------------------------------------------------- *
+ * 10. RENDERING — messages, markdown-lite, code blocks, typewriter
+ * ---------------------------------------------------------------------- */
+function clearChatDisplay(){ chatContainer.innerHTML = ''; }
+
+function showWelcomeScreen(){
+  const name = userDisplayName.value ? `, ${userDisplayName.value.split(' ')[0]}` : '';
+  chatContainer.innerHTML = `
+    <div class="welcome-wrap" id="welcomeWrap">
+      <div class="vortex-mark">
+        <svg width="56" height="56" viewBox="0 0 100 100">
+          <defs><linearGradient id="gradW" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#20e3ff"/><stop offset="100%" stop-color="#8a5cff"/></linearGradient></defs>
+          <path d="M50 14 A36 36 0 1 1 14 50" fill="none" stroke="url(#gradW)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M50 26 A24 24 0 1 0 74 50" fill="none" stroke="#20e3ff" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="8" fill="url(#gradW)"/>
+        </svg>
+      </div>
+      <div class="welcome-title">Where should we start${name}?</div>
+      <div class="welcome-sub">Ask a question, paste some code, drop in a file, or jump into voice mode.</div>
+      <div class="suggestion-chips">
+        <div class="chip" data-prompt="Explain how quantum computers work, simply">Explain something</div>
+        <div class="chip" data-prompt="Write a Python script that renames files in a folder">Write code</div>
+        <div class="chip" data-prompt="Help me plan a 3-day trip to Lagos">Plan something</div>
+        <div class="chip" data-prompt="Give me 5 creative startup ideas for 2026">Brainstorm</div>
+      </div>
+    </div>`;
+  chatContainer.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { userInput.value = c.dataset.prompt; sendMessage(); }));
+}
+
+function displayMessages(messages){
+  messages.forEach(msg => msg.role === 'user' ? displayUserMessage(msg.content, msg.imageUrl, msg.id) : displayBotMessage(msg.content, msg.id, false));
+  scrollToBottom();
+}
+
+function displayUserMessage(text, imageUrl, messageId){
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message user';
+  msgDiv.dataset.messageId = messageId;
+  msgDiv.innerHTML = `
+    <div class="avatar user-avatar"><i class="fas fa-user"></i></div>
+    <div class="bubble">
+      <div class="message-text">${escapeHtml(text)}</div>
+      ${imageUrl ? `<img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}','_blank')">` : ''}
+      <button class="edit-message-btn" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+      <button class="delete-message-btn" title="Delete"><i class="fas fa-trash"></i></button>
+    </div>`;
+  msgDiv.querySelector('.edit-message-btn').onclick = () => editExistingMessage(messageId, msgDiv);
+  msgDiv.querySelector('.delete-message-btn').onclick = () => deleteExistingMessage(messageId, msgDiv);
+  chatContainer.appendChild(msgDiv);
+}
+
+function displayBotMessage(text, messageId, animate){
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message bot';
+  msgDiv.dataset.messageId = messageId || '';
+  msgDiv.innerHTML = `
+    <div class="avatar bot-avatar"><i class="fas fa-atom" style="color:var(--cyan);"></i></div>
+    <div class="bubble">
+      <div class="message-text" aria-live="polite"></div>
+      <div class="message-actions">
+        <button class="action-icon copy-msg"><i class="fas fa-copy"></i> Copy</button>
+        <button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button>
+        <button class="action-icon regen-msg"><i class="fas fa-rotate"></i> Regenerate</button>
+        <button class="action-icon download-msg"><i class="fas fa-download"></i> Save as .md</button>
+      </div>
+    </div>`;
+  chatContainer.appendChild(msgDiv);
+  const textEl = msgDiv.querySelector('.message-text');
+
+  const finish = () => {
+    wireCodeBlocks(msgDiv);
+    if(window.hljs){ try{ hljs.highlightAll(); }catch(e){} }
   };
-  
-  function formatDate(timestamp) {
-    if (!timestamp) return 'Just now';
-    const date = new Date(timestamp);
-    return date.toLocaleDateString();
-  }
-  
-  function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-      color: white; padding: 8px 16px; border-radius: 50px;
-      font-size: 0.8rem; z-index: 5000; animation: fadeUp 0.3s ease;
-      white-space: nowrap;
-    `;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-  }
-  
-  function scrollToBottom() {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-  
-  function showTypingIndicator() {
-    if (typingDiv) typingDiv.remove();
-    typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot';
-    typingDiv.innerHTML = `<div class="avatar"><i class="fas fa-brain"></i></div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
-    chatContainer.appendChild(typingDiv);
-    scrollToBottom();
-  }
-  
-  function hideTypingIndicator() {
-    if (typingDiv) { typingDiv.remove(); typingDiv = null; }
-  }
-  
-  function closeSidebar() { sidebar.classList.remove('open'); }
-  function openSidebar() { sidebar.classList.add('open'); }
-  
-  // ==================== EXPORT FUNCTIONS ====================
-  async function exportChatAsTXT() {
-    if (!currentChatId) return;
-    
-    let content = `Vortex AI Chat Export\n${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
-    for (const msg of currentChatMessages) {
-      content += `[${msg.role.toUpperCase()}] (${new Date(msg.timestamp).toLocaleString()}):\n${msg.content}\n\n`;
+
+  if(animate && !prefersReducedMotion()){
+    let i = 0;
+    const speed = Math.max(2, Math.round(text.length / 140));
+    let cancelled = false;
+    function tick(){
+      if(cancelled) return;
+      i = Math.min(text.length, i + speed);
+      textEl.innerHTML = formatMessageText(text.slice(0, i)) + (i < text.length ? '<span class="typing-cursor"></span>' : '');
+      scrollToBottom();
+      if(i < text.length) requestAnimationFrame(tick);
+      else finish();
     }
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `vortex_chat_${currentChatId}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Exported as TXT', 'success');
+    requestAnimationFrame(tick);
+    textEl.addEventListener('click', () => { if(!cancelled){ cancelled = true; textEl.innerHTML = formatMessageText(text); finish(); } }, { once:true });
+  } else {
+    textEl.innerHTML = formatMessageText(text);
+    finish();
   }
-  
-  async function exportChatAsPDF() {
-    if (!currentChatId) return;
-    
-    let html = `
-      <html>
-      <head><title>Vortex AI Chat Export</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .message { margin: 10px 0; padding: 10px; border-radius: 8px; }
-        .user { background: #e3f2fd; }
-        .assistant { background: #f5f5f5; }
-        .role { font-weight: bold; }
-        .time { font-size: 10px; color: #666; }
-        hr { margin: 15px 0; }
-      </style>
-      </head>
-      <body>
-      <h1>Vortex AI Chat Export</h1>
-      <p>Exported: ${new Date().toLocaleString()}</p>
-      <hr>
-    `;
-    for (const msg of currentChatMessages) {
-      html += `
-        <div class="message ${msg.role}">
-          <div class="role">${msg.role.toUpperCase()}</div>
-          <div class="time">${new Date(msg.timestamp).toLocaleString()}</div>
-          <div>${msg.content.replace(/\n/g, '<br>')}</div>
+
+  const speakBtn = msgDiv.querySelector('.speak-msg');
+  speakBtn.onclick = () => {
+    if(speakBtn.classList.contains('speaking')){ stopSpeaking(); speakBtn.classList.remove('speaking'); speakBtn.innerHTML = '<i class="fas fa-volume-up"></i> Speak'; return; }
+    document.querySelectorAll('.speak-msg.speaking').forEach(b => { b.classList.remove('speaking'); b.innerHTML = '<i class="fas fa-volume-up"></i> Speak'; });
+    speakBtn.classList.add('speaking'); speakBtn.innerHTML = '<i class="fas fa-stop"></i> Stop';
+    speakText(text, () => { speakBtn.classList.remove('speaking'); speakBtn.innerHTML = '<i class="fas fa-volume-up"></i> Speak'; });
+  };
+  msgDiv.querySelector('.copy-msg').onclick = () => { navigator.clipboard.writeText(text); showToast('Copied to clipboard', 'success'); };
+  msgDiv.querySelector('.download-msg').onclick = () => downloadText(text, `vortex-response-${Date.now()}.md`);
+  msgDiv.querySelector('.regen-msg').onclick = () => regenerateLastResponse(messageId);
+
+  return msgDiv;
+}
+
+function editExistingMessage(messageId, msgDiv){
+  const textDiv = msgDiv.querySelector('.message-text');
+  const oldText = textDiv.innerText;
+  const newText = prompt('Edit your message:', oldText);
+  if(newText && newText !== oldText){
+    Store.updateMessage(currentChatId, messageId, { content:newText, edited:true });
+    const idx = currentChatMessages.findIndex(m => m.id === messageId);
+    if(idx !== -1) currentChatMessages[idx].content = newText;
+    textDiv.textContent = newText;
+    showToast('Message updated', 'success');
+  }
+}
+
+function deleteExistingMessage(messageId, msgDiv){
+  if(!confirm('Delete this message?')) return;
+  Store.deleteMessage(currentChatId, messageId);
+  const idx = currentChatMessages.findIndex(m => m.id === messageId);
+  if(idx !== -1) currentChatMessages.splice(idx,1);
+  msgDiv.remove();
+  Store.updateChat(currentChatId, { messageCount: currentChatMessages.length });
+  showToast('Message deleted', 'info');
+}
+
+/* ----- markdown-lite + code block rendering ----- */
+function escapeHtml(str){
+  if(!str) return '';
+  return str.replace(/[&<>]/g, m => m==='&'?'&amp;':(m==='<'?'&lt;':'&gt;'));
+}
+
+function inlineMarkdown(escapedText){
+  let t = escapedText;
+  t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+  t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+  return t;
+}
+
+function renderMarkdownLite(rawSegment){
+  const lines = rawSegment.split('\n');
+  let html = '';
+  let listType = null;
+  let inQuote = false;
+
+  function closeList(){ if(listType){ html += listType === 'ul' ? '</ul>' : '</ol>'; listType = null; } }
+  function closeQuote(){ if(inQuote){ html += '</blockquote>'; inQuote = false; } }
+
+  lines.forEach(line => {
+    const headerMatch = line.match(/^(#{1,3})\s+(.*)$/);
+    const ulMatch = line.match(/^\s*[-*]\s+(.*)$/);
+    const olMatch = line.match(/^\s*\d+\.\s+(.*)$/);
+    const quoteMatch = line.match(/^\s*>\s?(.*)$/);
+
+    if(headerMatch){
+      closeList(); closeQuote();
+      const level = headerMatch[1].length;
+      html += `<div class="md-h md-h${level}">${inlineMarkdown(escapeHtml(headerMatch[2]))}</div>`;
+    } else if(ulMatch){
+      closeQuote();
+      if(listType !== 'ul'){ closeList(); html += '<ul>'; listType = 'ul'; }
+      html += `<li>${inlineMarkdown(escapeHtml(ulMatch[1]))}</li>`;
+    } else if(olMatch){
+      closeQuote();
+      if(listType !== 'ol'){ closeList(); html += '<ol>'; listType = 'ol'; }
+      html += `<li>${inlineMarkdown(escapeHtml(olMatch[1]))}</li>`;
+    } else if(quoteMatch){
+      closeList();
+      if(!inQuote){ html += '<blockquote>'; inQuote = true; }
+      html += `${inlineMarkdown(escapeHtml(quoteMatch[1]))}<br>`;
+    } else if(line.trim() === ''){
+      closeList(); closeQuote();
+      html += '<div class="md-space"></div>';
+    } else {
+      closeList(); closeQuote();
+      html += `<div class="md-p">${inlineMarkdown(escapeHtml(line))}</div>`;
+    }
+  });
+  closeList(); closeQuote();
+  return html;
+}
+
+function formatMessageText(raw){
+  if(!raw) return '';
+  const codeBlockRegex = /```(\w*)\n?([\s\S]*?)```/g;
+  const parts = [];
+  let lastIndex = 0, match;
+  while((match = codeBlockRegex.exec(raw)) !== null){
+    if(match.index > lastIndex) parts.push({ type:'text', content: raw.slice(lastIndex, match.index) });
+    parts.push({ type:'code', lang: (match[1]||'plaintext').toLowerCase(), code: match[2].replace(/\n$/,'') });
+    lastIndex = codeBlockRegex.lastIndex;
+  }
+  if(lastIndex < raw.length) parts.push({ type:'text', content: raw.slice(lastIndex) });
+
+  return parts.map(p => {
+    if(p.type === 'text') return renderMarkdownLite(p.content);
+    const ext = CODE_EXT[p.lang] || 'txt';
+    const escaped = escapeHtml(p.code);
+    let b64 = '';
+    try{ b64 = btoa(unescape(encodeURIComponent(p.code))); }catch(e){ b64 = ''; }
+    return `<div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">${p.lang || 'code'}</span>
+        <div class="code-btns">
+          <button class="code-btn copy-code-btn" data-code="${encodeURIComponent(p.code)}"><i class="fas fa-copy"></i> Copy</button>
+          <button class="code-btn dl-code-btn" data-b64="${b64}" data-ext="${ext}"><i class="fas fa-download"></i> .${ext}</button>
         </div>
-        <hr>
-      `;
+      </div>
+      <pre><code class="language-${p.lang||'plaintext'}">${escaped}</code></pre>
+    </div>`;
+  }).join('');
+}
+
+function wireCodeBlocks(container){
+  container.querySelectorAll('.copy-code-btn').forEach(btn => {
+    btn.onclick = () => {
+      const code = decodeURIComponent(btn.dataset.code);
+      navigator.clipboard.writeText(code);
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+      setTimeout(() => { btn.innerHTML = original; }, 1600);
+    };
+  });
+  container.querySelectorAll('.dl-code-btn').forEach(btn => {
+    btn.onclick = () => {
+      if(!btn.dataset.b64) return;
+      let code = '';
+      try{ code = decodeURIComponent(escape(atob(btn.dataset.b64))); }catch(e){ return; }
+      const blob = new Blob([code], { type:'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `vortex-snippet.${btn.dataset.ext}`; a.click();
+      URL.revokeObjectURL(url);
+    };
+  });
+}
+
+function downloadText(text, filename){
+  const blob = new Blob([text], { type:'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Downloaded', 'success');
+}
+
+/* ---------------------------------------------------------------------- *
+ * 11. API COMMUNICATION
+ * ---------------------------------------------------------------------- */
+async function callVortexAPI(prompt, fileBase64=null, mimeType='image/jpeg', memoryContext=''){
+  currentAbortController = new AbortController();
+  try{
+    const requestBody = {
+      message: prompt,
+      system: buildSystemPrompt(),
+      model: selectedModel,
+      style: responseStyle,
+      temperature: Math.round((creativity/100) * 100) / 100,
+      memory: memoryContext,
+      image: fileBase64 ? { data:fileBase64, mimeType } : null
+    };
+    const timeoutId = setTimeout(() => currentAbortController.abort(), 60000);
+    const response = await fetch('/api/chat', {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(requestBody), signal: currentAbortController.signal
+    });
+    clearTimeout(timeoutId);
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if(data.choices && data.choices[0] && data.choices[0].message) return data.choices[0].message.content;
+    if(data.content) return data.content;
+    return "I'm here — what would you like to know?";
+  }catch(err){
+    if(err.name === 'AbortError') return null;
+    console.error('API error:', err);
+    return `I ran into a connection issue (${err.message}). Give it another shot.`;
+  }finally{
+    currentAbortController = null;
+  }
+}
+
+function setGeneratingUI(active){
+  isResponding = active;
+  sendBtn.classList.toggle('stop-mode', active);
+  sendBtn.title = active ? 'Stop generating' : 'Send (Enter)';
+  sendBtn.innerHTML = active ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-arrow-up"></i>';
+}
+
+async function requestAndDisplayResponse(promptText, fileInfo, voiceModeFlag){
+  const memoryContext = await getRelevantMemories();
+  showTypingIndicator();
+  setGeneratingUI(true);
+
+  if(voiceModeFlag) setVoiceState('thinking', 'Thinking…');
+
+  const response = await callVortexAPI(promptText, fileInfo?.base64, fileInfo?.mime, memoryContext);
+
+  hideTypingIndicator();
+  setGeneratingUI(false);
+
+  if(response === null){
+    // aborted by user
+    if(voiceModeFlag) closeVoiceMode();
+    return;
+  }
+
+  await saveMessage('assistant', response);
+  displayBotMessage(response, currentChatMessages[currentChatMessages.length - 1].id, true);
+  scrollToBottom();
+
+  if(voiceModeFlag){
+    setVoiceState('speaking', 'Speaking…');
+    speakText(response, () => { if(voiceModeActive) startVoiceListening(); });
+  } else if(autoSpeak && !isMuted){
+    speakText(response);
+  }
+}
+
+async function sendMessage(userText){
+  if(isResponding){ showToast('Still replying — tap stop first', 'info'); return; }
+  const text = userText || userInput.value.trim();
+  if(!text && !pendingFile) return;
+
+  if(!currentChatId) await createNewChat();
+  const welcomeWrap = document.getElementById('welcomeWrap');
+  if(welcomeWrap) welcomeWrap.remove();
+
+  const fileToSend = pendingFile;
+  const userImageUrl = fileToSend ? `data:${fileToSend.mime};base64,${fileToSend.base64}` : null;
+
+  await saveMessage('user', text || 'Analyzing attachment', userImageUrl);
+  displayUserMessage(text || 'Analyzing attachment', userImageUrl, currentChatMessages[currentChatMessages.length - 1].id);
+
+  userInput.value = ''; userInput.style.height = 'auto';
+  pendingFile = null; filePreviewArea.innerHTML = '';
+  scrollToBottom();
+
+  await requestAndDisplayResponse(text || 'Describe this attachment', fileToSend, false);
+}
+
+async function regenerateLastResponse(messageId){
+  if(isResponding){ showToast('Still replying — tap stop first', 'info'); return; }
+  const lastBot = currentChatMessages[currentChatMessages.length - 1];
+  if(!lastBot || lastBot.role !== 'assistant' || lastBot.id !== messageId){
+    showToast('Only the most recent reply can be regenerated', 'info');
+    return;
+  }
+  const lastUser = [...currentChatMessages].reverse().find(m => m.role === 'user');
+  if(!lastUser){ showToast('Nothing to regenerate from', 'info'); return; }
+
+  await Store.deleteMessage(currentChatId, lastBot.id);
+  currentChatMessages.pop();
+  const botDiv = chatContainer.querySelector(`[data-message-id="${lastBot.id}"]`);
+  if(botDiv) botDiv.remove();
+
+  await requestAndDisplayResponse(lastUser.content, null, false);
+}
+
+stopSpeakingOnStop:
+sendBtn.addEventListener('click', () => {
+  if(isResponding){
+    if(currentAbortController) currentAbortController.abort();
+  } else {
+    sendMessage();
+  }
+});
+
+/* ---------------------------------------------------------------------- *
+ * 12. UTILITIES
+ * ---------------------------------------------------------------------- */
+function formatDate(ts){
+  if(!ts) return 'Just now';
+  const d = new Date(ts), now = new Date();
+  if(d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  return d.toLocaleDateString();
+}
+
+let toastCounter = 0;
+function showToast(message, type='info'){
+  const id = 'toast_' + (toastCounter++);
+  const colors = { success:'#1ff2c1', error:'#ff5c72', info:'#20e3ff' };
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.id = id;
+  toast.style.background = colors[type] || colors.info;
+  toast.textContent = message;
+  toastStack.appendChild(toast);
+  setTimeout(() => { const el = document.getElementById(id); if(el) el.remove(); }, 2800);
+}
+
+function scrollToBottom(){ chatContainer.scrollTop = chatContainer.scrollHeight; }
+
+function showTypingIndicator(){
+  hideTypingIndicator();
+  typingDiv = document.createElement('div');
+  typingDiv.className = 'message bot';
+  typingDiv.innerHTML = `<div class="avatar bot-avatar"><i class="fas fa-atom" style="color:var(--cyan);"></i></div><div class="bubble"><div class="typing-indicator" aria-live="polite" aria-label="Vortex is typing"><span></span><span></span><span></span></div></div>`;
+  chatContainer.appendChild(typingDiv);
+  scrollToBottom();
+}
+function hideTypingIndicator(){ if(typingDiv){ typingDiv.remove(); typingDiv = null; } }
+
+function openSidebar(){ sidebar.classList.add('open'); sidebarScrim.classList.add('open'); }
+function closeSidebar(){ sidebar.classList.remove('open'); sidebarScrim.classList.remove('open'); }
+
+function closeTopmostOverlay(){
+  if(voiceModeActive){ closeVoiceMode(); return true; }
+  const openModal = document.querySelector('.modal-overlay.active');
+  if(openModal){ openModal.classList.remove('active'); return true; }
+  if(sidebar.classList.contains('open')){ closeSidebar(); return true; }
+  return false;
+}
+
+/* ---------------------------------------------------------------------- *
+ * 13. VOICE MODE (voice-to-voice) with live waveform
+ * ---------------------------------------------------------------------- */
+let audioCtx = null, analyser = null, micStream = null, waveRAF = null;
+
+async function startWaveform(){
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(micStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    source.connect(analyser);
+    drawWaveform();
+  }catch(e){
+    console.warn('Mic waveform visualization unavailable:', e.message);
+  }
+}
+function drawWaveform(){
+  if(!analyser) return;
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(data);
+  const avg = data.reduce((a,b) => a+b, 0) / data.length;
+  const scale = 1 + Math.min(avg / 90, 0.55);
+  if(voiceOrbCore && voiceOrb.classList.contains('listening')) voiceOrbCore.style.transform = `scale(${scale})`;
+  waveRAF = requestAnimationFrame(drawWaveform);
+}
+function stopWaveform(){
+  if(waveRAF) cancelAnimationFrame(waveRAF);
+  waveRAF = null;
+  if(micStream){ micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if(audioCtx){ try{ audioCtx.close(); }catch(e){} audioCtx = null; }
+  analyser = null;
+  if(voiceOrbCore) voiceOrbCore.style.transform = '';
+}
+
+function getRecognizer(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r = new SR();
+  r.lang = 'en-US'; r.interimResults = true; r.continuous = false;
+  return r;
+}
+
+function setVoiceState(state, label){
+  voiceOrb.className = 'voice-orb ' + state;
+  voiceStatusText.textContent = label;
+}
+
+function openVoiceMode(){
+  if(!(window.SpeechRecognition || window.webkitSpeechRecognition)){
+    showToast('Voice mode needs Chrome, Edge, or Safari', 'error');
+    return;
+  }
+  voiceModeActive = true;
+  voiceOverlay.style.display = 'flex';
+  voiceModeBtn.classList.add('active');
+  const welcomeWrap = document.getElementById('welcomeWrap');
+  if(welcomeWrap) welcomeWrap.remove();
+  startWaveform();
+  startVoiceListening();
+}
+
+function closeVoiceMode(){
+  voiceModeActive = false;
+  if(recognizer){ try{ recognizer.stop(); }catch(e){} recognizer = null; }
+  stopSpeaking();
+  stopWaveform();
+  voiceOverlay.style.display = 'none';
+  voiceModeBtn.classList.remove('active');
+}
+
+function startVoiceListening(){
+  if(!voiceModeActive || voiceModeMicMuted) return;
+  setVoiceState('listening', 'Listening…');
+  voiceTranscript.textContent = '';
+  recognizer = getRecognizer();
+  if(!recognizer) return;
+  let finalText = '';
+  recognizer.onresult = (event) => {
+    let interim = '';
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      if(event.results[i].isFinal) finalText += event.results[i][0].transcript;
+      else interim += event.results[i][0].transcript;
     }
-    html += '</body></html>';
-    
-    const blob = new Blob([html], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `vortex_chat_${currentChatId}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Exported as PDF', 'success');
-  }
-  
-  // ==================== EVENT LISTENERS ====================
-  menuBtn.addEventListener('click', openSidebar);
-  closeSidebarBtn.addEventListener('click', closeSidebar);
-  newChatBtn.addEventListener('click', async () => {
-    await createNewChat();
-    await loadAllChats();
-  });
-  
-  searchChatsInput.addEventListener('input', (e) => {
-    renderChatsList(e.target.value);
-  });
-  
-  profileCard.addEventListener('click', () => profileModal.classList.add('active'));
-  closeModalBtn.addEventListener('click', () => profileModal.classList.remove('active'));
-  saveProfileBtn.addEventListener('click', async () => {
-    await saveUserProfile();
-    profileModal.classList.remove('active');
-  });
-  
-  profileModal.addEventListener('click', (e) => {
-    if (e.target === profileModal) profileModal.classList.remove('active');
-  });
-  exportModal.addEventListener('click', (e) => {
-    if (e.target === exportModal) exportModal.classList.remove('active');
-  });
-  
-  document.getElementById('exportTxtBtn')?.addEventListener('click', () => {
-    exportChatAsTXT();
-    exportModal.classList.remove('active');
-  });
-  document.getElementById('exportPdfBtn')?.addEventListener('click', () => {
-    exportChatAsPDF();
-    exportModal.classList.remove('active');
-  });
-  
-  // Voice recording
-  let voicePressTimer = null;
-  let isVoicePressed = false;
-  let activeRecognition = null;
-  let voiceOverlay = null;
-  
-  function createVoiceWaveOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'voice-overlay';
-    overlay.innerHTML = `<div class="wave-container"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div></div><div style="color:white; font-size:0.7rem;">🎤 Listening... Release to send</div>`;
-    document.body.appendChild(overlay);
-    return overlay;
-  }
-  
-  function startVoiceRecording() {
-    if (!('webkitSpeechRecognition' in window)) {
-      showToast("Voice recognition requires Chrome or Edge", "error");
+    voiceTranscript.textContent = (finalText + ' ' + interim).trim();
+  };
+  recognizer.onend = async () => {
+    if(!voiceModeActive) return;
+    const spoken = finalText.trim();
+    if(spoken){
+      voiceTranscript.textContent = spoken;
+      if(!currentChatId) await createNewChat();
+      await saveMessage('user', spoken);
+      await requestAndDisplayResponse(spoken, null, true);
+    } else {
+      startVoiceListening();
+    }
+  };
+  recognizer.onerror = (e) => {
+    if(e.error === 'no-speech' || e.error === 'aborted'){ if(voiceModeActive) startVoiceListening(); return; }
+    if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+      showToast('Microphone access denied', 'error');
+      closeVoiceMode();
       return;
     }
-    
-    const SpeechRecognition = window.webkitSpeechRecognition;
-    activeRecognition = new SpeechRecognition();
-    activeRecognition.lang = 'en-US';
-    activeRecognition.interimResults = true;
-    activeRecognition.continuous = true;
-    
-    voiceOverlay = createVoiceWaveOverlay();
-    let finalTranscript = '';
-    
-    activeRecognition.onresult = (event) => {
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        }
-      }
-      if (voiceOverlay && finalTranscript) {
-        const textDiv = voiceOverlay.querySelector('div:last-child');
-        if (textDiv) textDiv.innerHTML = `📝 "${finalTranscript.substring(0, 35)}${finalTranscript.length > 35 ? '...' : ''}"`;
-      }
-    };
-    
-    activeRecognition.onend = () => {
-      if (voiceOverlay) voiceOverlay.remove();
-      if (finalTranscript.trim()) {
-        userInput.value = finalTranscript;
-        sendMessage(finalTranscript);
-      }
-      activeRecognition = null;
-    };
-    
-    activeRecognition.onerror = () => {
-      if (voiceOverlay) voiceOverlay.remove();
-      showToast("Voice recognition error", "error");
-      activeRecognition = null;
-    };
-    
-    activeRecognition.start();
-  }
-  
-  function stopVoiceRecording() {
-    if (activeRecognition) {
-      activeRecognition.stop();
-      activeRecognition = null;
+    showToast('Voice recognition hiccup — listening again', 'info');
+    if(voiceModeActive) startVoiceListening();
+  };
+  try{ recognizer.start(); }catch(e){}
+}
+
+voiceModeBtn.addEventListener('click', () => voiceModeActive ? closeVoiceMode() : openVoiceMode());
+voiceExitBtn.addEventListener('click', closeVoiceMode);
+voiceMuteBtn.addEventListener('click', () => {
+  voiceModeMicMuted = !voiceModeMicMuted;
+  voiceMuteBtn.classList.toggle('muted', voiceModeMicMuted);
+  voiceMuteBtn.innerHTML = voiceModeMicMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+  if(voiceModeMicMuted){ if(recognizer){ try{ recognizer.stop(); }catch(e){} } setVoiceState('', 'Mic muted'); }
+  else startVoiceListening();
+});
+
+muteBtn.addEventListener('click', () => {
+  isMuted = !isMuted;
+  muteBtn.classList.toggle('active', isMuted);
+  muteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+  if(isMuted) stopSpeaking();
+});
+
+/* ---------------------------------------------------------------------- *
+ * 14. FILE ATTACH, DRAG & DROP, PASTE
+ * ---------------------------------------------------------------------- */
+function handleIncomingFile(file){
+  if(!file) return;
+  const allowed = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+  if(!allowed.includes(file.type)){ showToast('Unsupported file type', 'error'); return; }
+  if(file.size > 12 * 1024 * 1024){ showToast('File is too large (max 12MB)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const base64 = ev.target.result.split(',')[1];
+    pendingFile = { base64, mime:file.type, name:file.name };
+    const isImage = file.type.startsWith('image/');
+    filePreviewArea.innerHTML = `<div class="file-preview">
+      ${isImage ? `<img src="data:${file.type};base64,${base64}">` : `<i class="fas fa-file-lines" style="color:var(--cyan);width:32px;text-align:center;"></i>`}
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(file.name)}</span>
+      <button class="remove-file" id="removeFileBtn" title="Remove"><i class="fas fa-times"></i></button>
+    </div>`;
+    document.getElementById('removeFileBtn').addEventListener('click', () => { pendingFile = null; filePreviewArea.innerHTML = ''; fileInput.value = ''; });
+  };
+  reader.onerror = () => showToast('Could not read that file', 'error');
+  reader.readAsDataURL(file);
+}
+
+attachBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => handleIncomingFile(e.target.files[0]));
+
+['dragenter','dragover'].forEach(evt => {
+  inputWrapper.addEventListener(evt, (e) => { e.preventDefault(); inputWrapper.classList.add('drag-over'); });
+  chatContainer.addEventListener(evt, (e) => { e.preventDefault(); chatContainer.classList.add('drag-over'); });
+});
+['dragleave','drop'].forEach(evt => {
+  inputWrapper.addEventListener(evt, (e) => { e.preventDefault(); inputWrapper.classList.remove('drag-over'); });
+  chatContainer.addEventListener(evt, (e) => { e.preventDefault(); chatContainer.classList.remove('drag-over'); });
+});
+inputWrapper.addEventListener('drop', (e) => { if(e.dataTransfer.files[0]) handleIncomingFile(e.dataTransfer.files[0]); });
+chatContainer.addEventListener('drop', (e) => { if(e.dataTransfer.files[0]) handleIncomingFile(e.dataTransfer.files[0]); });
+
+document.addEventListener('paste', (e) => {
+  if(document.activeElement !== userInput) return;
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  for(const item of items){
+    if(item.type.startsWith('image/')){
+      const file = item.getAsFile();
+      if(file){ handleIncomingFile(file); showToast('Image pasted', 'success'); }
     }
-    if (voiceOverlay) voiceOverlay.remove();
   }
-  
-  voiceBtn.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    isVoicePressed = true;
-    voicePressTimer = setTimeout(() => {
-      if (isVoicePressed) {
-        startVoiceRecording();
-        voiceBtn.style.background = '#00ffff';
-        voiceBtn.style.color = '#0a0a0f';
-      }
-    }, 100);
-  });
-  
-  voiceBtn.addEventListener('mouseup', () => {
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  voiceBtn.addEventListener('mouseleave', () => {
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  voiceBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    isVoicePressed = true;
-    voicePressTimer = setTimeout(() => {
-      if (isVoicePressed) {
-        startVoiceRecording();
-        voiceBtn.style.background = '#00ffff';
-        voiceBtn.style.color = '#0a0a0f';
-      }
-    }, 100);
-  });
-  
-  voiceBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    if (voicePressTimer) clearTimeout(voicePressTimer);
-    stopVoiceRecording();
-    voiceBtn.style.background = '';
-    voiceBtn.style.color = '';
-    isVoicePressed = false;
-  });
-  
-  // File attachment
-  attachBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const base64 = ev.target.result.split(',')[1];
-      pendingFile = { base64, mime: file.type, name: file.name };
-      
-      const isImage = file.type.startsWith('image/');
-      filePreviewArea.innerHTML = `<div class="file-preview">
-        ${isImage ? `<img src="data:${file.type};base64,${base64}" alt="preview">` : `<i class="fas fa-file-alt" style="color: #00ffff;"></i>`}
-        <span style="flex:1;">${escapeHtml(file.name)}</span>
-        <button class="remove-file" id="removeFileBtn"><i class="fas fa-times"></i></button>
-      </div>`;
-      
-      document.getElementById('removeFileBtn')?.addEventListener('click', () => {
-        pendingFile = null;
-        filePreviewArea.innerHTML = '';
-        fileInput.value = '';
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-  
-  // Image generation
-  generateImageBtn.addEventListener('click', async () => {
-    const prompt = userInput.value.trim();
-    if (prompt) {
-      if (!currentChatId) await createNewChat();
-      await saveMessage('user', `🎨 Generate image: ${prompt}`);
-      displayUserMessage(`🎨 Generate image: ${prompt}`);
-      
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${Date.now()}&nologo=true`;
-      
-      const imgMsgDiv = document.createElement('div');
-      imgMsgDiv.className = 'message bot';
-      imgMsgDiv.innerHTML = `
-        <div class="avatar"><i class="fas fa-robot"></i></div>
-        <div class="bubble">
-          <div class="message-text">✨ Here's your creation:</div>
-          <br><img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')">
-          <div class="message-actions"><button class="action-icon speak-msg"><i class="fas fa-volume-up"></i> Speak</button></div>
+});
+
+/* ---------------------------------------------------------------------- *
+ * 15. IMAGE GENERATION
+ * ---------------------------------------------------------------------- */
+let selectedImageStyle = null;
+
+generateImageBtn.addEventListener('click', () => {
+  const prompt = userInput.value.trim();
+  if(!prompt){ showToast('Describe the image you want first', 'info'); return; }
+  runImageGeneration(prompt);
+});
+
+async function runImageGeneration(basePrompt){
+  const fullPrompt = selectedImageStyle ? `${basePrompt}, ${selectedImageStyle.toLowerCase()} style` : basePrompt;
+  if(!currentChatId) await createNewChat();
+  const welcomeWrap = document.getElementById('welcomeWrap');
+  if(welcomeWrap) welcomeWrap.remove();
+
+  await saveMessage('user', `Generate an image: ${fullPrompt}`);
+  displayUserMessage(`Generate an image: ${fullPrompt}`, null, currentChatMessages[currentChatMessages.length - 1].id);
+  userInput.value = '';
+  showTypingIndicator();
+
+  const seed = Date.now();
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+
+  const img = new Image();
+  img.onload = async () => {
+    hideTypingIndicator();
+    const imgMsgDiv = document.createElement('div');
+    imgMsgDiv.className = 'message bot';
+    imgMsgDiv.innerHTML = `
+      <div class="avatar bot-avatar"><i class="fas fa-wand-magic-sparkles" style="color:var(--cyan);"></i></div>
+      <div class="bubble">
+        <div class="message-text">Here's what I came up with:</div>
+        <div class="generated-img-wrap">
+          <img src="${imageUrl}" class="generated-img" onclick="window.open('${imageUrl}','_blank')">
+          <button class="img-download-btn" title="Download"><i class="fas fa-download"></i></button>
         </div>
-      `;
-      chatContainer.appendChild(imgMsgDiv);
-      imgMsgDiv.querySelector('.speak-msg').onclick = () => speakWithSelectedVoice(`Here's your image of ${prompt}`);
-      
-      await saveMessage('assistant', `Generated image: ${prompt}`, imageUrl);
-      userInput.value = '';
-      scrollToBottom();
-      await loadAllChats();
-    } else {
-      showToast("Describe the image you want to create!", "info");
-    }
-  });
-  
-  sendBtn.addEventListener('click', () => sendMessage());
-  userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-  
-  // Initialize app
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (splashScreen.style.display !== 'none') {
-        splashScreen.style.opacity = '0';
-        setTimeout(() => {
-          splashScreen.style.display = 'none';
-          appDiv.style.opacity = '1';
-        }, 500);
-      }
-    }, 5000);
-    
-    anonymousSignIn();
-  });
-  
-  // Initialize speech synthesis voices
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = () => {
-      console.log("Voices loaded");
+        <div class="style-chips">${IMAGE_STYLES.map(s => `<button class="style-chip regen-style-chip" data-style="${s}">${s}</button>`).join('')}</div>
+        <div class="message-actions"><button class="action-icon regen-image-btn"><i class="fas fa-rotate"></i> Try again</button></div>
+      </div>`;
+    chatContainer.appendChild(imgMsgDiv);
+    imgMsgDiv.querySelector('.img-download-btn').onclick = () => {
+      const a = document.createElement('a'); a.href = imageUrl; a.download = `vortex-image-${seed}.jpg`; a.target = '_blank'; a.click();
     };
+    imgMsgDiv.querySelectorAll('.regen-style-chip').forEach(chip => {
+      chip.onclick = () => { selectedImageStyle = chip.dataset.style; runImageGeneration(basePrompt); };
+    });
+    imgMsgDiv.querySelector('.regen-image-btn').onclick = () => runImageGeneration(basePrompt);
+    await saveMessage('assistant', `Generated image for: ${fullPrompt}`, imageUrl);
+    scrollToBottom();
+  };
+  img.onerror = async () => {
+    hideTypingIndicator();
+    displayBotMessage("I couldn't generate that image just now — mind trying again in a moment?", null, false);
+    await saveMessage('assistant', "I couldn't generate that image just now.");
+  };
+  img.src = imageUrl;
+}
+
+/* ---------------------------------------------------------------------- *
+ * 16. EXPORT
+ * ---------------------------------------------------------------------- */
+function exportChatAsTXT(){
+  if(!currentChatId) return;
+  let content = `Vortex AI Chat Export\n${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
+  for(const msg of currentChatMessages) content += `[${msg.role.toUpperCase()}] (${new Date(msg.timestamp).toLocaleString()}):\n${msg.content}\n\n`;
+  downloadText(content, `vortex_chat_${currentChatId}.txt`);
+}
+function exportChatAsMD(){
+  if(!currentChatId) return;
+  let content = `# Vortex AI Chat Export\n_${new Date().toLocaleString()}_\n\n---\n\n`;
+  for(const msg of currentChatMessages) content += `**${msg.role === 'user' ? 'You' : 'Vortex'}:**\n\n${msg.content}\n\n---\n\n`;
+  downloadText(content, `vortex_chat_${currentChatId}.md`);
+}
+function copyAllConversation(){
+  if(!currentChatId || !currentChatMessages.length){ showToast('Nothing to copy yet', 'info'); return; }
+  const text = currentChatMessages.map(m => `${m.role === 'user' ? 'You' : 'Vortex'}: ${m.content}`).join('\n\n');
+  navigator.clipboard.writeText(text);
+  showToast('Conversation copied', 'success');
+}
+
+/* ---------------------------------------------------------------------- *
+ * ABOUT
+ * ---------------------------------------------------------------------- */
+document.getElementById('aboutBody').innerHTML = `
+  <p><strong>Vortex AI</strong> is a conversational assistant built by <strong>Vortex Technologies Unlimited</strong>.</p>
+  <p style="margin-top:.6rem;">Ask me directly if you'd like to know more about who's behind Vortex.</p>`;
+
+/* ---------------------------------------------------------------------- *
+ * 17. EVENT WIRING + KEYBOARD SHORTCUTS
+ * ---------------------------------------------------------------------- */
+menuBtn.addEventListener('click', openSidebar);
+closeSidebarBtn.addEventListener('click', closeSidebar);
+sidebarScrim.addEventListener('click', closeSidebar);
+newChatBtn.addEventListener('click', createNewChat);
+searchChatsInput.addEventListener('input', (e) => renderChatsList(e.target.value));
+
+profileCard.addEventListener('click', () => profileModal.classList.add('active'));
+closeModalBtn.addEventListener('click', () => profileModal.classList.remove('active'));
+saveProfileBtn.addEventListener('click', async () => { await saveUserProfile(); profileModal.classList.remove('active'); });
+[profileModal, exportModal, aboutModal].forEach(m => m.addEventListener('click', (e) => { if(e.target === m) m.classList.remove('active'); }));
+document.getElementById('closeExportBtn').addEventListener('click', () => exportModal.classList.remove('active'));
+document.getElementById('closeAboutBtn').addEventListener('click', () => aboutModal.classList.remove('active'));
+document.getElementById('exportTxtBtn').addEventListener('click', () => { exportChatAsTXT(); exportModal.classList.remove('active'); });
+document.getElementById('exportMdBtn').addEventListener('click', () => { exportChatAsMD(); exportModal.classList.remove('active'); });
+document.getElementById('copyAllBtn').addEventListener('click', () => { copyAllConversation(); exportModal.classList.remove('active'); });
+
+userInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+userInput.addEventListener('input', () => {
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 140) + 'px';
+});
+
+document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  if(mod && e.key.toLowerCase() === 'k'){ e.preventDefault(); openSidebar(); searchChatsInput.focus(); }
+  else if(mod && e.key.toLowerCase() === 'n'){ e.preventDefault(); createNewChat(); }
+  else if(e.key === 'Escape'){ closeTopmostOverlay(); }
+});
+
+/* ---------------------------------------------------------------------- *
+ * 18. BOOT SEQUENCE
+ * ---------------------------------------------------------------------- */
+function hideSplash(){
+  if(splashHidden) return;
+  splashHidden = true;
+  splashScreen.style.opacity = '0';
+  setTimeout(() => { splashScreen.style.display = 'none'; appDiv.style.opacity = '1'; }, 500);
+}
+
+async function boot(){
+  const hardFallback = setTimeout(() => {
+    splashRetryBtn.classList.add('show');
+  }, 4000);
+  splashRetryBtn.addEventListener('click', hideSplash);
+
+  splashStatus.textContent = 'Connecting…';
+  const mode = await Store.init();
+  clearTimeout(hardFallback);
+  splashRetryBtn.classList.remove('show');
+
+  splashStatus.textContent = mode === 'cloud' ? 'Loading your profile…' : 'Setting up local session…';
+  try{
+    await loadProfileIntoUI();
+    Store.watchChats(onChatsUpdated);
+  }catch(e){
+    console.warn('Profile/chat load error:', e);
+    showToast('Something went wrong loading your data — starting fresh', 'error');
   }
-  
-  hljs.highlightAll();
-  console.log("✅ Vortex AI Fully Loaded | Firebase Realtime DB | Sidebar on Left | 6 Unique Voices | Cross-Chat Memory");
+  hideSplash();
+
+  if(mode === 'local'){
+    setTimeout(() => showToast('Running in local mode — chats stay on this device', 'info'), 900);
+  }
+}
+
+// Absolute safety net: never let the splash block the app for more than 9s
+setTimeout(hideSplash, 9000);
+
+window.addEventListener('load', () => { boot(); });
+if(window.speechSynthesis){ window.speechSynthesis.onvoiceschanged = () => {}; }
+
+console.log('%cVortex AI', 'color:#20e3ff;font-size:16px;font-weight:bold;', '— v2 loaded (cloud/local storage, markdown, typewriter, voice waveform)');
 </script>
 </body>
 </html>
